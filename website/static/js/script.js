@@ -1,3 +1,3 @@
 function showAlert() {
-    alert('Your HTTPS setup is working!');
+    alert('Em desenvolvimento');
 }
