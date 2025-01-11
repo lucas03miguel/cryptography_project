@@ -1,6 +1,6 @@
 # Cryptography Project
 
-Este projeto demonstra a configuração de um website seguro com HTTPS usando o microframework Flask e uma infraestrutura de PKI personalizada.
+Este projeto demonstra a configuração de um website seguro com HTTPS usando Flask e uma infraestrutura de PKI personalizada.
 
 
 ## Como Executar o Projeto

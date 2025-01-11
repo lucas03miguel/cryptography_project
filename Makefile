@@ -12,6 +12,7 @@ run:
 	else \
 	    echo "Port $(PORT) is available. Starting server..."; \
 	fi
+	docker stop web
 	@python3 website/app.py
 
 run-alt:
@@ -24,6 +25,7 @@ run-alt:
 	else \
 	    echo "Port $$PORT is available. Starting server..."; \
 	fi
+	docker stop web
 	@python3 website/app.py --port=$$PORT
 
 .PHONY: run run-alt
