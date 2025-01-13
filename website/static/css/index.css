@@ -1,0 +1,48 @@
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 70vh;
+    gap: 70px;
+}
+
+
+.button-container button {
+    padding: 20px 40px;
+    font-size: 24px;
+    background-color: #4e4c4c;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Styles for the "Activate MFA" button */
+.mfa-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+}
+
+.mfa-button-style {
+    background-color: #007BFF;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mfa-button-style:hover {
+    background-color: #0056b3;
+}
+
+.mfa-button-style:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}

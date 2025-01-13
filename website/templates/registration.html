@@ -33,6 +33,8 @@
     <div class="form-container">
         <div class="form-block">
             <form action="/registration" method="POST">
+                <!-- Token CSRF -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <table>
                     <tbody>
                         <tr>
@@ -43,7 +45,7 @@
                                     oninput="this.setCustomValidity('')" required>
                             </td>
                         </tr>
-
+            
                         <tr>
                             <td><label>Password</label></td>
                             <td>
@@ -52,7 +54,7 @@
                                     oninput="this.setCustomValidity('')" required>
                             </td>
                         </tr>
-
+            
                         <tr>
                             <td colspan="2" style="padding: 0;">
                                 <div id="passwordHelp"></div>
@@ -69,6 +71,7 @@
                             </td>
                         </tr>
 
+            
                         <tr>
                             <td colspan="2" style="text-align: right;">
                                 <button type="submit" class="button-register">Register</button>
@@ -78,8 +81,6 @@
                 </table>
             </form>
             
-            
-
         </div>
     </div>
 

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DDSS PA2</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if not is_authenticated %}
+        <meta http-equiv="refresh" content="3.5; url=/login">
+    {% endif %}
+    <link rel="stylesheet" type="text/css" href="../static/styles.css">
+    <link rel="stylesheet" type="text/css" href="../static/index.css">
+
+</head>
+
+<body>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {% if not is_authenticated %}
+        <div class="log-message">
+            You need to log in to access this content.<br>
+            Being redirected to the login page...
+        </div>
+    {% else %}
+        <!-- MFA Button -->
+        <div class="mfa-button">
+            {% if mfa_enabled %}
+                <button onclick="confirmMFA('deactivate')" class="button mfa-button-style">Deactivate MFA</button>
+            {% else %}
+                <button onclick="confirmMFA('activate')" class="button mfa-button-style">Activate MFA</button>
+            {% endif %}
+        </div>
+
+        <script>
+            function confirmMFA(action) {
+                let message = action === 'activate' 
+                    ? "Do you want to activate Multi-Factor Authentication?"
+                    : "Do you want to deactivate Multi-Factor Authentication?";
+
+                const userConfirmed = confirm(message);
+
+                if (userConfirmed) {
+                    window.location.href = action === 'activate' ? "/activate_mfa" : "/deactivate_mfa";
+                }
+            }
+        </script>
+
+        <div class="back-button">
+            <form method="POST" action="/logout">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <button type="submit" class="button back-button-style">Logout</button>
+            </form>
+        </div>
+
+        <div class="header">
+            <h1>Welcome to My Secure Website!</h1>
+            <h2>This website is protected with HTTPS using a custom PKI</h2>
+            <hr>
+        </div>
+        
+        <div class="button-container">
+            <button onclick="location.href='/part2'">Add new contacts</button>
+            <button onclick="location.href='/part3'">Talk with your friends</button>
+        </div>
+    {% endif %}
+
+</body>
+</html>
