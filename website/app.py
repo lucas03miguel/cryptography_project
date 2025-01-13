@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, session, abort, make_response, url_for
+from flask import Flask, redirect, render_template, request, session, abort, make_response, url_for, flash
 import logging
 from database import get_db
 from markupsafe import escape
@@ -220,6 +220,15 @@ def logout():
     
     # Return the redirect response
     return resp
+
+
+##########################################################
+## Add Contacts
+##########################################################
+@app.route('/add_contacts', methods=['GET', 'POST'])
+def add_contacts():
+
+    return render_template('add_contacts.html')
 
 
 ##########################################################
