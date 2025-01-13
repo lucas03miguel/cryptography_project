@@ -1,5 +1,3 @@
-# Makefile for running Flask server and handling port conflicts
-
 PORT ?= 8080
 
 run:
@@ -12,7 +10,7 @@ run:
 	else \
 	    echo "Port $(PORT) is available. Starting server..."; \
 	fi
-	docker stop web
+	# docker stop web
 	@python3 website/app.py
 
 run-alt:
@@ -25,7 +23,7 @@ run-alt:
 	else \
 	    echo "Port $$PORT is available. Starting server..."; \
 	fi
-	docker stop web
+	# docker stop web
 	@python3 website/app.py --port=$$PORT
 
 .PHONY: run run-alt
