@@ -7,6 +7,7 @@ table {
     border-radius: 0.3125rem;
     margin: 0 auto;
     text-align: center;
+    table-layout: fixed;
 }
 
 .form-container {
@@ -30,8 +31,8 @@ th {
 td {
     padding: 0.625rem;
     text-align: left;
+    word-wrap: break-word;
 }
-
 
 input {
     width: 100%;
@@ -39,12 +40,10 @@ input {
     box-sizing: border-box;
 }
 
-
 input.checkbox {
     width: 1rem;
     height: 1rem;
 }
-
 
 .button-register {
     padding: 0.625rem 1.25rem;
@@ -58,12 +57,21 @@ input.checkbox {
     transition: background-color 0.3s ease;
 }
 
-
-input {
-    width: 95%;
-    padding: 5px;
-    box-sizing: border-box;
+#passwordHelp {
+    height: 4rem;
+    font-size: 12px;
+    color: red;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    display: block;
+    line-height: 1.0em;
+    overflow: hidden;
+    
 }
+
+
+/*
 
 .input-error {
     border: 2px solid red;
@@ -71,14 +79,16 @@ input {
     box-shadow: 0px 0px 5px red;
 }
 
+
 .input-success {
     border: 2px solid green;
     background-color: #e6ffe6;
     box-shadow: 0px 0px 5px green;
 }
 
+
 #passwordHelp {
-    min-height: 40px; /* Altura fixa para reservar espaço */
+    min-height: 40px;
     font-size: 12px;
     color: red;
     margin-top: 5px;
@@ -90,26 +100,26 @@ input {
 }
 
 
-button[type="submit"] {
-    margin-top: 0px;
-    padding: 10px 20px;
-    font-size: 1em;
-    cursor: pointer;
-}
+
+
 
 .message-cell {
-    height: 20px; /* Altura fixa para a célula da mensagem */
+    height: 20px; 
     vertical-align: middle;
     text-align: center;
 }
 
+
 .message {
-    font-size: 11px; /* Tamanho da letra */
+    font-size: 11px; 
     color: white;
     padding: 5px;
     border-radius: 5px;
 }
 
+
 .message-placeholder {
-    visibility: hidden; /* Reserva espaço quando não há mensagem */
+    visibility: hidden;
 }
+
+*/

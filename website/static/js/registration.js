@@ -1,5 +1,5 @@
 // Real-time password validation
-const passwordInput = document.querySelector('input[name="v_password"]');
+const passwordInput = document.querySelector('input[name="password"]');
 const passwordHelp = document.getElementById('passwordHelp');
 const form = document.getElementById('registrationForm');
 
@@ -27,8 +27,8 @@ passwordInput.addEventListener('input', function () {
     } else {
         passwordHelp.style.color = "red";
         passwordHelp.innerHTML = `
-            Your password must include:
-            <ul style="margin: 0; padding-left: 20px;">
+            <div style="margin-left: 1.5rem; text-align: left;">Your password must include:</div>
+            <ul style="text-align: left;">
                 ${errors.map(error => `<li>${error}</li>`).join("")}
             </ul>
         `;
