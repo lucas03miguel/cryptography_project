@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Serviço da base de dados PostgreSQL
+  db:
+    build: ./postgresql
+    container_name: db
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: cripto-database-assignment
+      POSTGRES_PASSWORD: cripto-database-assignment
+      POSTGRES_DB: cripto-database-assignment
+
+  # Serviço web (Python)
+  web:
+    build:
+      context: ./website  # Caminho para o diretório onde está o Dockerfile
+      dockerfile: Dockerfile  # Nome do ficheiro Dockerfile
+    container_name: web
+    volumes:
+      - "./website:/app"  # Mapeia o diretório local para o container
+      - "./myCA:/app/myCA"  # Monta os ficheiros SSL no contêiner
+    expose:
+      - "5000"
+    ports:
+      - "8080:5000"
+    depends_on:
+      - db
+    restart: on-failure
+    environment:
+      DATABASE_USER: cripto-database-assignment
+      DATABASE_PASSWORD: cripto-database-assignment
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: cripto-database-assignment
+      FLASK_APP: app.py  # Define a aplicação Flask
+      FLASK_ENV: development  # Ativa o modo de desenvolvimento
+      SSL_CERT_PATH: /app/myCA/server.crt
+      SSL_KEY_PATH: /app/myCA/server.key

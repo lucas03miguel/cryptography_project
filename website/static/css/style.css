@@ -1,25 +1,21 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    color: #333;
-    text-align: center;
-    padding: 20px;
+/* Center Buttons on Screen */
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+    gap: 70px;
 }
 
-h1 {
-    color: #007bff;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
+/* Button Styling */
+.button {
+    padding: 20px 40px;
+    font-size: 20px;
     color: #fff;
-    background-color: #007bff;
+    background-color: #4e4c4c;
+    text-decoration: none;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
+    transition: background-color 0.3s ease;
 }
