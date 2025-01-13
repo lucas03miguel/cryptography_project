@@ -1,5 +1,4 @@
 from flask import Flask, redirect, render_template, request, session, abort
-from flask_wtf.csrf import CSRFProtect
 import logging
 from database import get_db
 
@@ -7,7 +6,6 @@ from database import get_db
 app = Flask(__name__)
 logger = logging.getLogger('logger')
 
-csrf = CSRFProtect()
 
 @app.before_request
 def restrict_methods():
@@ -44,18 +42,28 @@ def login():
 
     if is_authenticated:
         return redirect("/index")
-    
+
     session['route'] = 'login'
 
     return render_template("login.html")
+
+
+@app.route("/registration", methods=['GET', 'POST'])
+def registration():
+    is_authenticated = 'user' in session
+
+    if is_authenticated:
+        return redirect("/index")
+
+    session['route'] = 'registration'
+
+    return render_template("registration.html")
 
 
 ##########################################################
 ## MAIN
 ##########################################################
 def main():
-    csrf.init_app(app)
-
     app.config.from_object('config.Config')
     logging.basicConfig(filename="logs/log_file.log")
 

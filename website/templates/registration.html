@@ -3,11 +3,12 @@
 <html lang="en">
 
 <head>
-    <title>DDSS PA2 - Part 1.1</title>
+    <title>Cryptography - Project</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="../static/registration.css">
-    <link rel="stylesheet" type="text/css" href="../static/styles.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/registration.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
+    <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
 
     {% if message_type == 'success' %}
     <meta http-equiv="refresh" content="1.5; url=/login">
@@ -21,71 +22,73 @@
         </a>
     </div>
 
-    <!-- Page Header -->
+
     <div class="header">
-        <h1>Design and Development of Secure Software</h1>
-        <h2>Practical Assignment #2 - Part 1.1</h2>
+        <h1>Registration!</h1>
+        <h2>This website is protected with HTTPS using a custom PKI</h2>
         <hr>
     </div>
 
-    <!-- Centered Content -->
-    <div class="center-container">
-        <form action="/registration" method="POST" id="registrationForm">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <table>
-                <thead>
-                    <tr>
-                        <th colspan="2">Registration</th>
-                    </tr>
-                </thead>
 
-                <tbody>
-                    <tr>
-                        <td><label>Username</label></td>
-                        <td>
-                            <input type="text" placeholder="Enter Username" name="v_username" maxlength="32"
-                                class="{% if message_type == 'error' %}input-error{% elif message_type == 'success' %}input-success{% endif %}"
-                                required autocomplete="off" oninvalid="this.setCustomValidity('Username is required!')"
-                                oninput="this.setCustomValidity('')">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label>Password</label></td>
-                        <td>
-                            <input type="password" placeholder="Enter Password" name="v_password" maxlength="64"
-                                class="{% if message_type == 'error' %}input-error{% elif message_type == 'success' %}input-success{% endif %}"
-                                required autocomplete="off" oninvalid="this.setCustomValidity('Password is required!')"
-                                oninput="this.setCustomValidity('')">
-                            <div id="passwordHelp">
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" class="message-cell">
-                            {% if message %}
-                            <div class="message {{ message_type }}">
-                                {{ message }}
-                            </div>
-                            {% else %}
-                            <div class="message-placeholder"></div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="text-align: center;">
-                            <button type="submit">Register</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="form-container">
+        <div class="form-block">
+            <form action="/registration" method="POST">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><label>Username</label></td>
+                            <td>
+                                <input type="text" placeholder="Enter Username" name="username" maxlength="32"
+                                    class="{% if message_type == 'error' %}input-error{% elif message_type == 'success' %}input-success{% endif %}"
+                                    autocomplete="off" oninvalid="this.setCustomValidity('Username is required!')"
+                                    oninput="this.setCustomValidity('')" required>
+                            </td>
+                        </tr>
 
+                        <tr>
+                            <td><label>Password</label></td>
+                            <td>
+                                <input type="password" placeholder="Enter Password" name="password"
+                                    class="{% if message_type == 'error' %}input-error{% elif message_type == 'success' %}input-success{% endif %}"
+                                    autocomplete="off" oninvalid="this.setCustomValidity('Password is required!')"
+                                    oninput="this.setCustomValidity('')" required>
+                                <div id="passwordHelp">
+                                </div>
+                            </td>
+                        </tr>
 
-        </form>
+                        <tr>
+                            <td colspan="2" class="message-cell">
+                                {% if message %}
+                                <div class="message {{ message_type }}">
+                                    {{ message }}
+                                </div>
+                                {% else %}
+                                <div class="message-placeholder"></div>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" style="text-align: right;">
+                                <button type="submit" class="button-register">Register</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+            
+            {% if message2 %}
+            <div class="message {{ message_type }}">
+                {{ message2 }}
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     <script>
         // Real-time password validation
-        const passwordInput = document.querySelector('input[name="v_password"]');
+        const passwordInput = document.querySelector('input[name="password"]');
         const passwordHelp = document.getElementById('passwordHelp');
         const form = document.getElementById('registrationForm');
 

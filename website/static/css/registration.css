@@ -1,0 +1,115 @@
+table {
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    width: 90%;
+    max-width: 20rem;
+    box-shadow: 0px 0px 0.625rem rgba(0, 0, 0, 0.2);
+    border-radius: 0.3125rem;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+    gap: 5rem;
+}
+
+.form-block {
+    position: relative;
+}
+
+th {
+    padding: 0.625rem;
+    font-size: 1.125rem;
+    width: 100%;
+}
+
+td {
+    padding: 0.625rem;
+    text-align: left;
+}
+
+
+input {
+    width: 100%;
+    padding: 0.3125rem;
+    box-sizing: border-box;
+}
+
+
+input.checkbox {
+    width: 1rem;
+    height: 1rem;
+}
+
+
+.button-register {
+    padding: 0.625rem 1.25rem;
+    font-size: 1.125rem;
+    color: #fff;
+    background-color: rgb(76, 76, 76);
+    text-decoration: none;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+input {
+    width: 95%;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.input-error {
+    border: 2px solid red;
+    background-color: #ffe6e6;
+    box-shadow: 0px 0px 5px red;
+}
+
+.input-success {
+    border: 2px solid green;
+    background-color: #e6ffe6;
+    box-shadow: 0px 0px 5px green;
+}
+
+#passwordHelp {
+    min-height: 40px; /* Altura fixa para reservar espaço */
+    font-size: 12px;
+    color: red;
+    margin-top: 5px;
+    margin-left: 0;
+    text-align: left;
+    display: block;
+    line-height: 1.0em;
+    overflow: hidden;
+}
+
+
+button[type="submit"] {
+    margin-top: 0px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.message-cell {
+    height: 20px; /* Altura fixa para a célula da mensagem */
+    vertical-align: middle;
+    text-align: center;
+}
+
+.message {
+    font-size: 11px; /* Tamanho da letra */
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.message-placeholder {
+    visibility: hidden; /* Reserva espaço quando não há mensagem */
+}

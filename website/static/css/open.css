@@ -1,35 +1,7 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f9f9f9;
-}
-
-
-.header {
-    text-align: center;
-    padding: 10px;
-}
-
-
-h1,
-h2 {
-    margin: 10px 0;
-    color: #333;
-}
-
-
-hr {
-    width: 50%;
-    margin: 10px auto;
-    border: 1px solid #ccc;
-}
-
-
 .button-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 70vh;
-    gap: 70px;
+    gap: 5rem;
 }

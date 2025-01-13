@@ -17,7 +17,7 @@
 <body>
     <div class="back-button">
         <a href="/">
-            <button class="button">Back</button>
+            <button type="submit" class="button back-button-style">Back</button>
         </a>
     </div>
 
@@ -27,40 +27,33 @@
         <hr>
     </div>
 
-
     <div class="form-container">
         <div class="form-block">
-            <form action="/part1_correct_login" method="POST">
-
+            <form action="/login" method="POST">
                 <table>
-                    <thead>
-                        <tr>
-                            <th colspan="2"><b>Login</b></th>
-                        </tr>
-                    </thead>
                     <tbody>
                         <tr>
                             <td><label>Username</label></td>
-                            <td><input type="text" placeholder="Enter Username" name="c_username"
-                                    value="{{ remembered_username_secure }}" required autocomplete="off" oninvalid="this.setCustomValidity('Username is required!')"
-                                    oninput="this.setCustomValidity('')">
-                                </td>
+                            <td><input type="text" placeholder="Enter Username" name="username"
+                                    value="{{ remembered_username }}" autocomplete="off" oninvalid="this.setCustomValidity('Username is required!')"
+                                    oninput="this.setCustomValidity('')" required>
+                            </td>
                         </tr>
+
                         <tr>
                             <td><label>Password</label></td>
-                            <td><input type="password" placeholder="Enter Password" name="c_password" required autocomplete="off" oninvalid="this.setCustomValidity('Password is required!')"
-                                oninput="this.setCustomValidity('')">
+                            <td><input type="password" placeholder="Enter Password" name="password" 
+                                    autocomplete="off" oninvalid="this.setCustomValidity('Password is required!')"
+                                    oninput="this.setCustomValidity('')" required>
                             </td>
                         </tr>
                         <tr>
                             <td><label>Remember me</label></td>
-                            <td>
-                                <input class="checkbox" type="checkbox" name="c_remember" value="on">
-                            </td>
+                            <td><input class="checkbox" type="checkbox" name="remember" value="on"></td>
                         </tr>
                         <tr>
                             <td colspan="2" style="text-align: right;">
-                                <button type="submit" class="button-login">Login</button>
+                                <button class="button-login">Login</button>
                             </td>
                         </tr>
                     </tbody>

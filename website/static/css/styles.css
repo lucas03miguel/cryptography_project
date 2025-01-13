@@ -1,11 +1,39 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+
+.header {
+    text-align: center;
+    padding: 1rem;
+}
+
+
+h1,
+h2 {
+    margin: 0.5rem 0;
+    color: #333;
+}
+
+
+hr {
+    width: 50%;
+    margin: 1rem auto;
+    border: 1px solid #ccc;
+}
+
+
 .button {
-    padding: 20px 40px;
-    font-size: 20px;
+    padding: 1rem 2rem;
+    font-size: 1.25rem;
     color: #fff;
     background-color: rgb(76, 76, 76);
     text-decoration: none;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.3125rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -18,14 +46,12 @@ button:hover {
 
 .back-button {
     position: absolute;
-    top: 30px;
-    left: 30px;
+    top: 2rem;
+    left: 2rem;
 }
 
 
 .back-button-style {
-    font-size: 16px;
-    padding: 15px 30px;
+    font-size: 1rem;
+    padding: 0.9375rem 1.875rem;
 }
-
-
