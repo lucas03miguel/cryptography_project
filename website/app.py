@@ -8,6 +8,7 @@ from extensions import csrf
 app = Flask(__name__)
 logger = logging.getLogger('logger')
 
+
 app.config['SESSION_PERMANENT'] = False
 
 
@@ -16,6 +17,8 @@ def restrict_methods():
     allowed_methods = ['GET', 'POST']
     if request.method not in allowed_methods:
         abort(405) 
+
+
 
 
 ##########################################################
@@ -44,35 +47,30 @@ def home():
 
 
 
+
 ##########################################################
 ## Login Page
 ##########################################################
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    # Verifica se o utilizador já está autenticado
     if 'user' in session:
         return redirect("/index")
 
-    # Inicializa o estado da sessão, se necessário
     if 'route' not in session:
         session['route'] = None
 
-    # Verifica acesso válido
     if not session.get('valid_access') and session['route'] != 'login':
         session['route'] = 'login'
         return redirect("/login")
 
-    # Atualiza o estado da sessão para "login"
     session['route'] = 'login'
 
     if request.method == 'POST':
         try:
-            # Obtém os dados do formulário
             username = request.form['username']
             password = request.form['password']
             remember = request.form.get('remember', 'off')
 
-            # Consulta a base de dados
             conn = get_db()
             cur = conn.cursor()
             query = "SELECT password, salt, mfa_enabled, totp_secret FROM users WHERE username = %s"
@@ -81,9 +79,9 @@ def login():
             conn.close()
 
             if not result:
-                return make_response(render_template('login.html', message2="Invalid credentials!", message_type="error"))
+                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
-            # Valida a senha
+
             stored_hash, stored_salt, mfa_enabled, totp_secret = result
             salt_bytes = binascii.unhexlify(stored_salt.encode('utf-8'))
             key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt_bytes, 100000)
@@ -94,14 +92,14 @@ def login():
                     session['mfa_pending'] = username
                     session['totp_secret'] = totp_secret
                     return make_response(render_template('login.html', 
-                                                         message2="Redirecting to MFA...", 
+                                                         message="Redirecting to MFA...", 
                                                          message_type="success", 
                                                          redirect=True, 
                                                          redirect_url="/validate_mfa"))
 
                 session['user'] = username
                 resp = make_response(render_template('login.html', 
-                                                     message2="Login successful!", 
+                                                     message="Login successful!", 
                                                      message_type="success", 
                                                      redirect=True, 
                                                      redirect_url="/index"))
@@ -109,14 +107,15 @@ def login():
                     resp.set_cookie('remembered_username', username, max_age=86400, secure=True, httponly=True, samesite='Strict')
                 return resp
             else:
-                return make_response(render_template('login.html', message2="Invalid credentials!", message_type="error"))
+                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
-            return make_response(render_template('login.html', message2="An error occurred during login. Please try again.", message_type="error"))
+            return make_response(render_template('login.html', message="An error occurred during login. Please try again.", message_type="error"))
     
-    # Renderiza a página de login no caso de GET
     return render_template("login.html")
+
+
 
 
 ##########################################################
@@ -171,6 +170,8 @@ def part1_registration():
     return render_template("registration.html")
 
 
+
+
 ##########################################################
 ## Index
 ##########################################################
@@ -197,6 +198,65 @@ def index():
     return render_template("index.html", is_authenticated=True, mfa_enabled=mfa_enabled)
 
 
+
+
+##########################################################
+## MFA
+##########################################################
+@app.route("/activate_mfa", methods=['GET', 'POST'])
+def mfa():
+    return """
+    <div class="back-button">
+        <a href="/index">
+            <button type="submit" class="button back-button-style">Back</button>
+        </a>
+    </div>
+
+    Em desenvolvimento (ou talvez não)
+    """
+
+
+
+
+##########################################################
+## Add friends
+##########################################################
+@app.route("/add_friends", methods=['GET', 'POST'])
+def add_friends():
+    is_authenticated = 'user' in session
+
+    session['route'] = 'index'
+
+    if not is_authenticated:
+        return render_template("addFriends.html", is_authenticated=False)
+    
+    username = session['user']
+    
+    return render_template("addFriends.html", is_authenticated=True)
+
+
+
+
+
+##########################################################
+## Talk with friends
+##########################################################
+@app.route("/talk_with_friends", methods=['GET', 'POST'])
+def talk_with_friends():
+    is_authenticated = 'user' in session
+
+    session['route'] = 'index'
+
+    if not is_authenticated:
+        return render_template("talkWithFriends.html", is_authenticated=False)
+    
+    username = session['user']
+    
+    return render_template("talkWithFriends.html", is_authenticated=True)
+
+
+
+
 ##########################################################
 ## Logout
 ##########################################################
@@ -207,19 +267,16 @@ def logout():
         return redirect("/index")
 
     session['route'] = 'logout'
-    # Clear the session data
     session.clear()
     
-    # Create the response object for the redirect
-    resp = redirect(url_for('home'))
+    resp = redirect('/')
     
-    # Check if the 'remembered_username' cookie exists before attempting to delete it
     if request.cookies.get('remembered_username'):  
-        # Remove the 'remembered_username' cookie
         resp.delete_cookie('remembered_username')
     
-    # Return the redirect response
     return resp
+
+
 
 
 ##########################################################
