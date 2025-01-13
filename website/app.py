@@ -1,12 +1,14 @@
-from flask import Flask, redirect, render_template, request, session, abort, make_response
+from flask import Flask, redirect, render_template, request, session, abort, make_response, url_for
 import logging
 from database import get_db
 from markupsafe import escape
 import os, logging, hashlib, binascii, hmac
-
+from extensions import csrf
 
 app = Flask(__name__)
 logger = logging.getLogger('logger')
+
+app.config['SESSION_PERMANENT'] = False
 
 
 @app.before_request
@@ -66,9 +68,9 @@ def login():
     if request.method == 'POST':
         try:
             # Obtém os dados do formulário
-            username = request.form['c_username']
-            password = request.form['c_password']
-            remember = request.form.get('c_remember', 'off')
+            username = request.form['username']
+            password = request.form['password']
+            remember = request.form.get('remember', 'off')
 
             # Consulta a base de dados
             conn = get_db()
@@ -168,9 +170,61 @@ def part1_registration():
 
 
 ##########################################################
+## Index
+##########################################################
+@app.route("/index", methods=['GET', 'POST'])
+def index():
+    is_authenticated = 'user' in session
+
+    session['route'] = 'index'
+
+    if not is_authenticated:
+        return render_template("index.html", is_authenticated=False)
+    
+    username = session['user']
+    
+    # Fetch MFA status from the database
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT mfa_enabled FROM users WHERE username = %s", (username,))
+    result = cur.fetchone()
+    conn.close()
+
+    mfa_enabled = result[0] if result else False  # Check if MFA is enabled (True/False)
+
+    return render_template("index.html", is_authenticated=True, mfa_enabled=mfa_enabled)
+
+
+##########################################################
+## Logout
+##########################################################
+@app.route('/logout', methods=['GET' ,'POST'])
+def logout():
+
+    if not session.get('valid_access') or session['route'] not in ['index']:
+        return redirect("/index")
+
+    session['route'] = 'logout'
+    # Clear the session data
+    session.clear()
+    
+    # Create the response object for the redirect
+    resp = redirect(url_for('home'))
+    
+    # Check if the 'remembered_username' cookie exists before attempting to delete it
+    if request.cookies.get('remembered_username'):  
+        # Remove the 'remembered_username' cookie
+        resp.delete_cookie('remembered_username')
+    
+    # Return the redirect response
+    return resp
+
+
+##########################################################
 ## MAIN
 ##########################################################
 def main():
+    csrf.init_app(app)
     app.config.from_object('config.Config')
     logging.basicConfig(filename="logs/log_file.log")
 
