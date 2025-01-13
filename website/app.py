@@ -132,6 +132,8 @@ def part1_registration():
         username = escape(request.form['username'])
         password = escape(request.form['password'])
 
+        print(f"Username: {username}")
+        print(f"Password: {password}")
         conn = get_db()
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE username = %s", (username,))

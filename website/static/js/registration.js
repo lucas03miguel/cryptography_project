@@ -1,12 +1,10 @@
-// Real-time password validation
 const passwordInput = document.querySelector('input[name="password"]');
 const passwordHelp = document.getElementById('passwordHelp');
-const form = document.getElementById('registrationForm');
+const form = document.querySelector('form');
 
 passwordInput.addEventListener('input', function () {
     const password = passwordInput.value;
 
-    // Clear validation message if password is empty
     if (password === "") {
         passwordHelp.innerHTML = "";
         return;
@@ -23,7 +21,8 @@ passwordInput.addEventListener('input', function () {
 
     if (errors.length === 0) {
         passwordHelp.style.color = "green";
-        passwordHelp.innerHTML = `<div style="margin-left: 1.5rem; text-align: left;">Password is strong!`;
+        passwordHelp.innerHTML = `<div style="margin-left: 1.5rem; text-align: left;">Password is strong!</div>`;
+        passwordInput.setCustomValidity("");
     } else {
         passwordHelp.style.color = "red";
         passwordHelp.innerHTML = `
@@ -32,25 +31,24 @@ passwordInput.addEventListener('input', function () {
                 ${errors.map(error => `<li>${error}</li>`).join("")}
             </ul>
         `;
+        passwordInput.setCustomValidity("Password must meet the strength criteria.");
     }
 });
 
-// Form submit validation
+
 form.addEventListener('submit', function (event) {
-    if (passwordInput.value === "" || passwordHelp.style.color === "red") {
-        // Prevent form submission
+    if (passwordHelp.style.color !== "green") {
         event.preventDefault();
-
-        passwordInput.setCustomValidity("Password is required and must meet the strength criteria.");
-        passwordInput.reportValidity();
-    } else {
-        passwordInput.setCustomValidity(""); 
+        alert("Please ensure your password meets the required criteria.");
     }
 });
 
+const messageTd = document.getElementById('message-td');
 const inputs = document.querySelectorAll('input');
 inputs.forEach(input => {
     input.addEventListener('input', function () {
-        input.classList.remove('input-error', 'input-success');
+        if (messageTd && messageTd.innerHTML.trim() !== '') {
+            messageTd.innerHTML = '';
+        }
     });
 });

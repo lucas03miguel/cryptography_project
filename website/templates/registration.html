@@ -10,9 +10,9 @@
     <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
     <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
 
-    {% if message_type == 'success' %}
+    <!-- {% if message_type == 'success' %}
     <meta http-equiv="refresh" content="1.5; url=/login">
-    {% endif %}
+    {% endif %} -->
 </head>
 
 <body>
@@ -54,8 +54,18 @@
                         </tr>
 
                         <tr>
-                            <td colspan="2">
+                            <td colspan="2" style="padding: 0;">
                                 <div id="passwordHelp"></div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" id="message-td" style="padding: 0;">
+                                {% if message %}
+                                <div class="message {{ message_type }}">
+                                    {{ message }}
+                                </div>
+                                {% endif %}
                             </td>
                         </tr>
 
@@ -68,11 +78,8 @@
                 </table>
             </form>
             
-            {% if message %}
-            <div class="message {{ message_type }}">
-                {{ message }}
-            </div>
-            {% endif %}
+            
+
         </div>
     </div>
 

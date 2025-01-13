@@ -10,6 +10,7 @@ table {
     table-layout: fixed;
 }
 
+
 .form-container {
     display: flex;
     justify-content: center;
@@ -18,9 +19,11 @@ table {
     gap: 5rem;
 }
 
+
 .form-block {
     position: relative;
 }
+
 
 th {
     padding: 0.625rem;
@@ -28,11 +31,13 @@ th {
     width: 100%;
 }
 
+
 td {
     padding: 0.625rem;
     text-align: left;
     word-wrap: break-word;
 }
+
 
 input {
     width: 100%;
@@ -40,10 +45,12 @@ input {
     box-sizing: border-box;
 }
 
+
 input.checkbox {
     width: 1rem;
     height: 1rem;
 }
+
 
 .button-register {
     padding: 0.625rem 1.25rem;
@@ -57,18 +64,38 @@ input.checkbox {
     transition: background-color 0.3s ease;
 }
 
+
 #passwordHelp {
+    display: block;
     height: 4rem;
     font-size: 12px;
     color: red;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
     text-align: center;
-    display: block;
     line-height: 1.0em;
     overflow: hidden;
-    
 }
+
+
+#message-td {
+    height: 3rem;
+}
+
+.message {
+    display: block;
+    padding-left: 0.6250rem;
+    font-size: 14px; 
+    color: white;
+    border-radius: 0.3125rem;
+}
+
+.message.error {
+    color: red;
+}
+
+.message.success {
+    color: green;
+}
+
 
 
 /*
@@ -98,9 +125,6 @@ input.checkbox {
     line-height: 1.0em;
     overflow: hidden;
 }
-
-
-
 
 
 .message-cell {
