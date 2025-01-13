@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: cripto-database-assignment
       POSTGRES_DB: cripto-database-assignment
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgresql/cripto-db-schema-pg.sql:/docker-entrypoint-initdb.d/cripto-db-schema-pg.sql
     ports:
       - "5432:5432"
 
@@ -42,7 +42,3 @@ services:
       SSL_KEY_PATH: /myCA/server.key
     command: >
       bash -c "nginx -t && service nginx start && python /app/app.py"
-
-# Volumes persistentes
-volumes:
-  postgres_data:

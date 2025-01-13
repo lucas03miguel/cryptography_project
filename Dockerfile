@@ -27,6 +27,9 @@ COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 # Copiar os certificados SSL
 COPY ./myCA /etc/ssl/certs
 
+# Copiar o script SQL para inicializar a base de dados
+COPY ./postgresql/cripto-db-schema-pg.sql /docker-entrypoint-initdb.d/cripto-db-schema-pg.sql
+
 # Criar o diretório de logs
 RUN mkdir -p logs
 
@@ -35,4 +38,3 @@ EXPOSE 80 443 5000
 
 # Comando para iniciar o NGINX e o Flask
 CMD ["sh", "-c", "nginx -t && service nginx start && python /app/app.py --reload"]
-
