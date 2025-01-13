@@ -11,14 +11,14 @@ Para visualizar o website localmente, corre o seguinte comando no terminal:
 make
 ```
 
-Se preferires escolher uma porta diferente, usa:
-
-```bash
-make run-alt
-```
-
 Depois, abre o browser e vai a:
 
 ```
-http://localhost:<PORT>
+https://localhost
+```
+
+ou
+
+```
+http://localhost
 ```

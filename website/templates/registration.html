@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>DDSS PA2 - Part 1.1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/registration.css">
+    <link rel="stylesheet" type="text/css" href="../static/styles.css">
+
+    {% if message_type == 'success' %}
+    <meta http-equiv="refresh" content="1.5; url=/login">
+    {% endif %}
+</head>
+
+<body>
+    <div class="back-button">
+        <a href="/">
+            <button type="submit" class="button back-button-style">Back</button>
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="header">
+        <h1>Design and Development of Secure Software</h1>
+        <h2>Practical Assignment #2 - Part 1.1</h2>
+        <hr>
+    </div>
+
+    <!-- Centered Content -->
+    <div class="center-container">
+        <form action="/registration" method="POST" id="registrationForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="2">Registration</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td><label>Username</label></td>
+                        <td>
+                            <input type="text" placeholder="Enter Username" name="v_username" maxlength="32"
+                                class="{% if message_type == 'error' %}input-error{% elif message_type == 'success' %}input-success{% endif %}"
+                                required autocomplete="off" oninvalid="this.setCustomValidity('Username is required!')"
+                                oninput="this.setCustomValidity('')">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label>Password</label></td>
+                        <td>
+                            <input type="password" placeholder="Enter Password" name="v_password" maxlength="64"
+                                class="{% if message_type == 'error' %}input-error{% elif message_type == 'success' %}input-success{% endif %}"
+                                required autocomplete="off" oninvalid="this.setCustomValidity('Password is required!')"
+                                oninput="this.setCustomValidity('')">
+                            <div id="passwordHelp">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="message-cell">
+                            {% if message %}
+                            <div class="message {{ message_type }}">
+                                {{ message }}
+                            </div>
+                            {% else %}
+                            <div class="message-placeholder"></div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;">
+                            <button type="submit">Register</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+        </form>
+    </div>
+
+    <script>
+        // Real-time password validation
+        const passwordInput = document.querySelector('input[name="v_password"]');
+        const passwordHelp = document.getElementById('passwordHelp');
+        const form = document.getElementById('registrationForm');
+
+        passwordInput.addEventListener('input', function () {
+            const password = passwordInput.value;
+
+            // Clear validation message if password is empty
+            if (password === "") {
+                passwordHelp.innerHTML = "";
+                return;
+            }
+
+            const rules = [
+                { regex: /.{8,}/, message: "At least 8 characters" },
+                { regex: /[A-Z]/, message: "One uppercase letter" },
+                { regex: /[a-z]/, message: "One lowercase letter" },
+                { regex: /[@$!%*?&]/, message: "One special character (@$!%*?&)" }
+            ];
+
+            const errors = rules.filter(rule => !rule.regex.test(password)).map(rule => rule.message);
+
+            if (errors.length === 0) {
+                passwordHelp.style.color = "green";
+                passwordHelp.innerHTML = "Password is strong!";
+            } else {
+                passwordHelp.style.color = "red";
+                passwordHelp.innerHTML = `
+                    Your password must include:
+                    <ul style="margin: 0; padding-left: 20px;">
+                        ${errors.map(error => `<li>${error}</li>`).join("")}
+                    </ul>
+                `;
+            }
+        });
+
+        // Form submit validation
+        form.addEventListener('submit', function (event) {
+            if (passwordInput.value === "" || passwordHelp.style.color === "red") {
+                // Prevent form submission
+                event.preventDefault();
+
+                passwordInput.setCustomValidity("Password is required and must meet the strength criteria.");
+                passwordInput.reportValidity();
+            } else {
+                passwordInput.setCustomValidity(""); 
+            }
+        });
+
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', function () {
+                input.classList.remove('input-error', 'input-success');
+            });
+        });
+
+    </script>
+
+
+</body>
+
+</html>

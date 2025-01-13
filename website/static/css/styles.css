@@ -1,0 +1,31 @@
+.button {
+    padding: 20px 40px;
+    font-size: 20px;
+    color: #fff;
+    background-color: rgb(76, 76, 76);
+    text-decoration: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+button:hover {
+    background-color: rgb(50, 50, 50);
+}
+
+
+.back-button {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+}
+
+
+.back-button-style {
+    font-size: 16px;
+    padding: 15px 30px;
+}
+
+

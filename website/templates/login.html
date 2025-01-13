@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cryptography - Project</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
+    <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
+
+    {% if redirect %}
+    <meta http-equiv="refresh" content="1.5; url={{ redirect_url }}">
+    {% endif %}
+</head>
+
+<body>
+    <div class="back-button">
+        <a href="/">
+            <button class="button">Back</button>
+        </a>
+    </div>
+
+    <div class="header">
+        <h1>Login!</h1>
+        <h2>This website is protected with HTTPS using a custom PKI</h2>
+        <hr>
+    </div>
+
+
+    <div class="form-container">
+        <div class="form-block">
+            <form action="/part1_correct_login" method="POST">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2"><b>Login</b></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><label>Username</label></td>
+                            <td><input type="text" placeholder="Enter Username" name="c_username"
+                                    value="{{ remembered_username_secure }}" required autocomplete="off" oninvalid="this.setCustomValidity('Username is required!')"
+                                    oninput="this.setCustomValidity('')">
+                                </td>
+                        </tr>
+                        <tr>
+                            <td><label>Password</label></td>
+                            <td><input type="password" placeholder="Enter Password" name="c_password" required autocomplete="off" oninvalid="this.setCustomValidity('Password is required!')"
+                                oninput="this.setCustomValidity('')">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label>Remember me</label></td>
+                            <td>
+                                <input class="checkbox" type="checkbox" name="c_remember" value="on">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: right;">
+                                <button type="submit" class="button-login">Login</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+            
+            {% if message2 %}
+            <div class="message {{ message_type }}">
+                {{ message2 }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

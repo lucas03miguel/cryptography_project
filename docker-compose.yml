@@ -1,16 +1,48 @@
 version: '3.8'
 
 services:
+  # Serviço da base de dados PostgreSQL
+  db:
+    image: postgres:latest
+    container_name: cryptography_project_db
+    environment:
+      POSTGRES_USER: cripto-database-assignment
+      POSTGRES_PASSWORD: cripto-database-assignment
+      POSTGRES_DB: cripto-database-assignment
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Serviço web (Flask + NGINX)
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cryptography_project_web
+    volumes:
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"  # Monta o ficheiro nginx.conf
+      - "./website:/app"
+      - "./myCA:/myCA"  # Monta a pasta com os certificados SSL
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./myCA:/myCA
-      - ./website:/app
+    depends_on:
+      - db
+    restart: on-failure
     environment:
-      - FLASK_APP=/app/app.py
+      DATABASE_USER: cripto-database-assignment
+      DATABASE_PASSWORD: cripto-database-assignment
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: cripto-database-assignment
+      FLASK_APP: /app/app.py
+      FLASK_ENV: development
+      SSL_CERT_PATH: /myCA/server.crt
+      SSL_KEY_PATH: /myCA/server.key
     command: >
-      bash -c "service nginx start && python /app/app.py"
+      bash -c "nginx -t && service nginx start && python /app/app.py"
+
+# Volumes persistentes
+volumes:
+  postgres_data:
