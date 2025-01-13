@@ -23,7 +23,7 @@ passwordInput.addEventListener('input', function () {
 
     if (errors.length === 0) {
         passwordHelp.style.color = "green";
-        passwordHelp.innerHTML = "Password is strong!";
+        passwordHelp.innerHTML = `<div style="margin-left: 1.5rem; text-align: left;">Password is strong!`;
     } else {
         passwordHelp.style.color = "red";
         passwordHelp.innerHTML = `
