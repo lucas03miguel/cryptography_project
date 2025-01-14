@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, session, abort, make_response, url_for
+from flask import Flask, redirect, render_template, request, session, abort, make_response, flash
 import logging
 from database import get_db
 from markupsafe import escape
@@ -346,6 +346,19 @@ def manage_friend_request():
             INSERT INTO friends (user1, user2) VALUES (%s, %s)
         """, (username, sender))
         
+        # Verificar se já existe uma conversa entre os dois utilizadores
+        cur.execute("""
+            SELECT conversation_id FROM conversations
+            WHERE (user1 = %s AND user2 = %s) OR (user1 = %s AND user2 = %s)
+        """, (username, sender, sender, username))
+        conversation = cur.fetchone()
+
+        if not conversation:
+            # Criar uma nova conversa se não existir
+            cur.execute("""
+                INSERT INTO conversations (user1, user2) VALUES (%s, %s)
+            """, (username, sender))
+
         # Remover o pedido de amizade
         cur.execute("""
             DELETE FROM friend_requests WHERE sender = %s AND receiver = %s
@@ -355,6 +368,7 @@ def manage_friend_request():
         cur.execute("""
             DELETE FROM friend_requests WHERE sender = %s AND receiver = %s
         """, (username, sender))
+
         
     elif action == "reject":
         # Rejeitar o pedido: apenas remover o pedido de amizade
@@ -374,18 +388,111 @@ def manage_friend_request():
 ##########################################################
 ## Talk with friends
 ##########################################################
-@app.route("/talk_with_friends", methods=['GET', 'POST'])
+@app.route("/talk_with_friends", methods=['GET'])
 def talk_with_friends():
     is_authenticated = 'user' in session
 
-    session['route'] = 'index'
+    session['route'] = 'talk_with_friends'
 
     if not is_authenticated:
         return render_template("talkWithFriends.html", is_authenticated=False)
-    
+
     username = session['user']
-    
-    return render_template("talkWithFriends.html", is_authenticated=True)
+
+    # Conectar à base de dados e buscar os amigos do utilizador
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT user2 FROM friends WHERE user1 = %s
+        UNION
+        SELECT user1 FROM friends WHERE user2 = %s
+    """, (username, username))
+    friends = cur.fetchall()
+    conn.close()
+
+    # Converter a lista de amigos para um formato utilizável
+    friends_list = [friend[0] for friend in friends]
+
+    return render_template("talkWithFriends.html", is_authenticated=True, friends=friends_list)
+
+
+@app.route("/talk_with_friends/<friend>", methods=['GET'])
+def talk_with_specific_friend(friend):
+    is_authenticated = 'user' in session
+
+    if not is_authenticated:
+        return render_template("talkWithFriends.html", is_authenticated=False)
+
+    username = session['user']
+
+    # Conectar à base de dados e buscar os amigos do utilizador
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT user2 FROM friends WHERE user1 = %s
+        UNION
+        SELECT user1 FROM friends WHERE user2 = %s
+    """, (username, username))
+    friends = cur.fetchall()
+
+    # Converter a lista de amigos para um formato utilizável
+    friends_list = [friend[0] for friend in friends]
+
+    # Buscar as mensagens entre o utilizador e o amigo selecionado
+    cur.execute("""
+        SELECT sender, message, sent_at FROM conversation_messages
+        WHERE conversation_id = (
+            SELECT conversation_id FROM conversations
+            WHERE (user1 = %s AND user2 = %s) OR (user1 = %s AND user2 = %s)
+        )
+        ORDER BY sent_at
+    """, (username, friend, friend, username))
+    messages = cur.fetchall()
+    conn.close()
+
+    # Converter mensagens para um formato utilizável no template
+    messages_list = [{"sender": msg[0], "message": msg[1], "timestamp": msg[2]} for msg in messages]
+
+    return render_template(
+        "talkWithFriends.html",
+        is_authenticated=True,
+        friends=friends_list,
+        selected_friend=friend,
+        messages=messages_list
+    )
+
+
+@app.route("/send_message", methods=['POST'])
+def send_message():
+    is_authenticated = 'user' in session
+    if not is_authenticated:
+        return redirect("/login")
+
+    username = session['user']
+    friend = request.form.get('friend')
+    message = request.form.get('message')
+
+    # Validar entrada
+    if not friend or not message:
+        flash("Friend or message is missing.", "error")
+        return redirect(f"/talk_with_friends/{friend}")
+
+    # Inserir a mensagem na base de dados
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO conversation_messages (conversation_id, sender, message)
+        VALUES (
+            (SELECT conversation_id FROM conversations
+             WHERE (user1 = %s AND user2 = %s) OR (user1 = %s AND user2 = %s)),
+            %s, %s
+        )
+    """, (username, friend, friend, username, username, message))
+    conn.commit()
+    conn.close()
+
+    # Redirecionar para recarregar a conversa
+    return redirect(f"/talk_with_friends/{friend}")
 
 
 
