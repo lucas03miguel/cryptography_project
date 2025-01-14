@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, session, abort, make_response, url_for, flash
+from flask import Flask, redirect, render_template, request, session, abort, make_response, url_for
 import logging
 from database import get_db
 from markupsafe import escape
@@ -8,6 +8,7 @@ from extensions import csrf
 app = Flask(__name__)
 logger = logging.getLogger('logger')
 
+
 app.config['SESSION_PERMANENT'] = False
 
 
@@ -16,6 +17,8 @@ def restrict_methods():
     allowed_methods = ['GET', 'POST']
     if request.method not in allowed_methods:
         abort(405) 
+
+
 
 
 ##########################################################
@@ -44,35 +47,30 @@ def home():
 
 
 
+
 ##########################################################
 ## Login Page
 ##########################################################
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    # Verifica se o utilizador já está autenticado
     if 'user' in session:
         return redirect("/index")
 
-    # Inicializa o estado da sessão, se necessário
     if 'route' not in session:
         session['route'] = None
 
-    # Verifica acesso válido
     if not session.get('valid_access') and session['route'] != 'login':
         session['route'] = 'login'
         return redirect("/login")
 
-    # Atualiza o estado da sessão para "login"
     session['route'] = 'login'
 
     if request.method == 'POST':
         try:
-            # Obtém os dados do formulário
             username = request.form['username']
             password = request.form['password']
             remember = request.form.get('remember', 'off')
 
-            # Consulta a base de dados
             conn = get_db()
             cur = conn.cursor()
             query = "SELECT password, salt, mfa_enabled, totp_secret FROM users WHERE username = %s"
@@ -81,9 +79,9 @@ def login():
             conn.close()
 
             if not result:
-                return make_response(render_template('login.html', message2="Invalid credentials!", message_type="error"))
+                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
-            # Valida a senha
+
             stored_hash, stored_salt, mfa_enabled, totp_secret = result
             salt_bytes = binascii.unhexlify(stored_salt.encode('utf-8'))
             key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt_bytes, 100000)
@@ -94,14 +92,14 @@ def login():
                     session['mfa_pending'] = username
                     session['totp_secret'] = totp_secret
                     return make_response(render_template('login.html', 
-                                                         message2="Redirecting to MFA...", 
+                                                         message="Redirecting to MFA...", 
                                                          message_type="success", 
                                                          redirect=True, 
                                                          redirect_url="/validate_mfa"))
 
                 session['user'] = username
                 resp = make_response(render_template('login.html', 
-                                                     message2="Login successful!", 
+                                                     message="Login successful!", 
                                                      message_type="success", 
                                                      redirect=True, 
                                                      redirect_url="/index"))
@@ -109,14 +107,15 @@ def login():
                     resp.set_cookie('remembered_username', username, max_age=86400, secure=True, httponly=True, samesite='Strict')
                 return resp
             else:
-                return make_response(render_template('login.html', message2="Invalid credentials!", message_type="error"))
+                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
-            return make_response(render_template('login.html', message2="An error occurred during login. Please try again.", message_type="error"))
+            return make_response(render_template('login.html', message="An error occurred during login. Please try again.", message_type="error"))
     
-    # Renderiza a página de login no caso de GET
     return render_template("login.html")
+
+
 
 
 ##########################################################
@@ -171,6 +170,8 @@ def part1_registration():
     return render_template("registration.html")
 
 
+
+
 ##########################################################
 ## Index
 ##########################################################
@@ -197,6 +198,193 @@ def index():
     return render_template("index.html", is_authenticated=True, mfa_enabled=mfa_enabled)
 
 
+
+
+##########################################################
+## MFA
+##########################################################
+@app.route("/activate_mfa", methods=['GET', 'POST'])
+def mfa():
+    return """
+    <div class="back-button">
+        <a href="/index">
+            <button type="submit" class="button back-button-style">Back</button>
+        </a>
+    </div>
+
+    Em desenvolvimento (ou talvez não)
+    """
+
+
+
+
+##########################################################
+## Add friends
+##########################################################
+@app.route("/add_friends", methods=['GET', 'POST'])
+def add_friends():
+    is_authenticated = 'user' in session
+
+    session['route'] = 'add_friends'
+
+    if not is_authenticated:
+        return render_template("addFriends.html", is_authenticated=False)
+
+    username = session['user']
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    # Obter pedidos de amizade recebidos
+    cur.execute("""
+        SELECT sender FROM friend_requests 
+        WHERE receiver = %s AND status = 'pending'
+    """, (username,))
+    friend_requests = [{"sender": row[0]} for row in cur.fetchall()]
+
+    if request.method == 'POST':
+        friend_username = escape(request.form['friend_username'])
+
+        # Verificar se o utilizador está a tentar adicionar a si próprio
+        if username == friend_username:
+            return render_template("addFriends.html", is_authenticated=True, 
+                                   message="You cannot send a friend request to yourself.", 
+                                   message_type="error", 
+                                   friend_requests=friend_requests)
+
+        # Verificar se o amigo existe
+        cur.execute("SELECT * FROM users WHERE username = %s", (friend_username,))
+        friend = cur.fetchone()
+
+        if not friend:
+            return render_template("addFriends.html", is_authenticated=True, 
+                                   message="User does not exist.", 
+                                   message_type="error", 
+                                   friend_requests=friend_requests)
+
+        # Verificar se já existe um pedido de amizade pendente
+        cur.execute("""
+            SELECT * FROM friend_requests 
+            WHERE sender = %s AND receiver = %s AND status = 'pending'
+        """, (username, friend_username))
+        pending_request = cur.fetchone()
+
+        if pending_request:
+            return render_template(
+                "addFriends.html", 
+                is_authenticated=True, 
+                message="Friend request already sent and is still pending.", 
+                message_type="neutral", 
+                friend_requests=friend_requests
+            )
+
+        # Verificar se já existe uma amizade entre os dois utilizadores
+        cur.execute("""
+            SELECT * FROM friends 
+            WHERE (user1 = %s AND user2 = %s) OR (user1 = %s AND user2 = %s)
+        """, (username, friend_username, friend_username, username))
+        friendship = cur.fetchone()
+
+        if friendship:
+            return render_template(
+                "addFriends.html", 
+                is_authenticated=True, 
+                message="You are already friends with this user.", 
+                message_type="neutral", 
+                friend_requests=friend_requests
+            )
+
+        # Adicionar pedido de amizade
+        cur.execute("""
+            INSERT INTO friend_requests (sender, receiver, status)
+            VALUES (%s, %s, %s)
+        """, (username, friend_username, 'pending'))
+        conn.commit()
+
+        # Sucesso
+        return render_template("addFriends.html", is_authenticated=True, 
+                               message="Friend request sent successfully!", 
+                               message_type="success", 
+                               friend_requests=friend_requests)
+
+    conn.close()
+
+    # Renderizar a página com os pedidos de amizade recebidos
+    return render_template("addFriends.html", is_authenticated=True, friend_requests=friend_requests)
+
+
+
+@app.route("/manage_friend_request", methods=["GET", "POST"])
+def manage_friend_request():
+    if request.method == "GET":
+        # Retorna uma mensagem ou redireciona, já que essa rota é para POST.
+        return redirect("/add_friends")
+    
+    if 'route' not in session:
+        session['route'] = None
+
+    if not session.get('valid_access') and session['route'] not in ['add_Friends', 'manage_friend_request']:
+        return redirect("/add_Friends")
+    
+    session['route'] = 'manage_friend_request'
+
+    username = session['user']
+    sender = escape(request.form['sender'])
+    action = request.form['action']
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    if action == "accept":
+        # Aceitar o pedido: adicionar na tabela de amigos
+        cur.execute("""
+            INSERT INTO friends (user1, user2) VALUES (%s, %s)
+        """, (username, sender))
+        
+        # Remover o pedido de amizade
+        cur.execute("""
+            DELETE FROM friend_requests WHERE sender = %s AND receiver = %s
+        """, (sender, username))
+
+        # Remover o pedido inverso (caso exista)
+        cur.execute("""
+            DELETE FROM friend_requests WHERE sender = %s AND receiver = %s
+        """, (username, sender))
+        
+    elif action == "reject":
+        # Rejeitar o pedido: apenas remover o pedido de amizade
+        cur.execute("""
+            DELETE FROM friend_requests WHERE sender = %s AND receiver = %s
+        """, (sender, username))
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/add_friends")
+
+
+
+
+
+##########################################################
+## Talk with friends
+##########################################################
+@app.route("/talk_with_friends", methods=['GET', 'POST'])
+def talk_with_friends():
+    is_authenticated = 'user' in session
+
+    session['route'] = 'index'
+
+    if not is_authenticated:
+        return render_template("talkWithFriends.html", is_authenticated=False)
+    
+    username = session['user']
+    
+    return render_template("talkWithFriends.html", is_authenticated=True)
+
+
+
+
 ##########################################################
 ## Logout
 ##########################################################
@@ -207,28 +395,16 @@ def logout():
         return redirect("/index")
 
     session['route'] = 'logout'
-    # Clear the session data
     session.clear()
     
-    # Create the response object for the redirect
-    resp = redirect(url_for('home'))
+    resp = redirect('/')
     
-    # Check if the 'remembered_username' cookie exists before attempting to delete it
     if request.cookies.get('remembered_username'):  
-        # Remove the 'remembered_username' cookie
         resp.delete_cookie('remembered_username')
     
-    # Return the redirect response
     return resp
 
 
-##########################################################
-## Add Contacts
-##########################################################
-@app.route('/add_contacts', methods=['GET', 'POST'])
-def add_contacts():
-
-    return render_template('add_contacts.html')
 
 
 ##########################################################

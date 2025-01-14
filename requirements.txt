@@ -1,0 +1,8 @@
+Flask==3.0.0
+Flask-WTF
+Flask-Session
+psycopg2-binary
+pyotp
+qrcode[pil]
+flask-socketio
+cryptography

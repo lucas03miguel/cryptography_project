@@ -53,6 +53,17 @@
                             <td><label>Remember me</label></td>
                             <td><input class="checkbox" type="checkbox" name="remember" value="on"></td>
                         </tr>
+
+                        <tr>
+                            <td colspan="2" id="message-td" style="padding: 0;">
+                                {% if message %}
+                                <div class="message {{ message_type }}">
+                                    {{ message }}
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+
                         <tr>
                             <td colspan="2" style="text-align: right;">
                                 <button class="button-login">Login</button>
@@ -61,12 +72,6 @@
                     </tbody>
                 </table>
             </form>
-            
-            {% if message2 %}
-            <div class="message {{ message_type }}">
-                {{ message2 }}
-            </div>
-            {% endif %}
         </div>
     </div>
 </body>

@@ -55,3 +55,17 @@ button:hover {
     font-size: 1rem;
     padding: 0.9375rem 1.875rem;
 }
+
+
+.log-message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100vh;
+    
+    font-size: 24px;
+    color: red;
+    font-weight: bold;
+    line-height: 1.5;
+}

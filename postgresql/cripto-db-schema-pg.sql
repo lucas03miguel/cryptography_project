@@ -9,6 +9,20 @@ CREATE TABLE users (
     mfa_enabled BOOLEAN         DEFAULT FALSE -- Indica se o utilizador ativou MFA
 );
 
+CREATE TABLE friend_requests (
+    id SERIAL PRIMARY KEY,
+    sender VARCHAR(32) NOT NULL,
+    receiver VARCHAR(32) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE friends (
+    id SERIAL PRIMARY KEY,
+    user1 VARCHAR(32) NOT NULL,
+    user2 VARCHAR(32) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE messages (
     message_id  SERIAL PRIMARY KEY,

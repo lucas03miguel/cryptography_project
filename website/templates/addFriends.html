@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cryptography - Project</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/css/addFriends.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/styles.css">
+    <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
+
+    {% if not is_authenticated %}
+        <meta http-equiv="refresh" content="3.5; url=/login">
+    {% endif %}
+</head>
+
+<body>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {% if not is_authenticated %}
+    <div class="log-message">
+        You need to log in to access this content.<br>
+        Being redirected to the login page...
+    </div>
+    {% else %}
+        <div class="back-button">
+            <a href="/index">
+                <button type="submit" class="button back-button-style">Back</button>
+            </a>
+        </div>
+
+        <div class="header">
+            <h1>Add Friends!</h1>
+            <h2>This website is protected with HTTPS using a custom PKI</h2>
+            <hr>
+        </div>
+
+        <div class="form-container">
+            <div class="form-block">
+                <form action="/add_friends" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td colspan="2">
+                                    <label for="friend_username">Friend's Username</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input type="text" id="friend_username" class="username-input" placeholder="Enter Friend's Username" name="friend_username" 
+                                        autocomplete="off" oninvalid="this.setCustomValidity('Friend\'s Username is required!')"
+                                        oninput="this.setCustomValidity('')" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding: 0;">
+                                    <div id="message-td" style="padding: 0;">
+                                        <div id="message-td" style="padding: 0;">
+                                            <div class="message {{ message_type or 'neutral' }}">
+                                                {{ message or '' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="padding: 0;">
+                                    <button type="submit" class="add-friend-button">Add Friend</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        
+        <div class="friend-requests-container">
+            <h3>Friend Requests Received</h3>
+            {% if friend_requests %}
+                <div class="table-wrapper">
+                    <table class="friend-requests-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in friend_requests %}
+                            <tr>
+                                <td>{{ request.sender }}</td>
+                                <td>
+                                    <form action="/manage_friend_request" method="POST" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="sender" value="{{ request.sender }}">
+                                        <button type="submit" name="action" value="accept" class="accept-button">Accept</button>
+                                        <button type="submit" name="action" value="reject" class="reject-button">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No friend requests received.</p>
+            {% endif %}
+        </div>
+        
+    {% endif %}
+
+    <script>
+        // Verificar se existe uma mensagem visível e com conteúdo
+        window.addEventListener('load', function () {
+            const messageDiv = document.querySelector('.message');
+            if (messageDiv && messageDiv.textContent.trim() !== '') {
+                // Definir um timer para remover a mensagem após 3 segundos
+                setTimeout(() => {
+                    // Recarregar a página sem mensagens
+                    window.location.href = window.location.pathname;
+                }, 3000); // 3 segundos
+            }
+        });
+    </script>
+</body>
+</html>

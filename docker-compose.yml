@@ -21,9 +21,9 @@ services:
       dockerfile: Dockerfile
     container_name: cryptography_project_web
     volumes:
-      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"  # Monta o ficheiro nginx.conf
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
       - "./website:/app"
-      - "./myCA:/myCA"  # Monta a pasta com os certificados SSL
+      - "./myCA:/myCA"
     ports:
       - "80:80"
       - "443:443"

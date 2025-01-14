@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DDSS PA2</title>
+    <title>Cryptography - Project</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% if not is_authenticated %}
@@ -60,8 +60,13 @@
         </div>
         
         <div class="button-container">
-            <button onclick="location.href='/add_contacts'">Add new contacts</button>
-            <button onclick="location.href='/chats'">Talk with your friends</button>
+            <a href="/add_friends">
+                <button class="button">Add new contacts</button>
+            </a>
+
+            <a href="/talk_with_friends">
+                <button class="button">Talk with your friends</button>
+            </a>
         </div>
     {% endif %}
 

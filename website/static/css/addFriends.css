@@ -1,0 +1,140 @@
+table {
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    width: 100%;
+    max-width: 25rem; /* Aumentar largura máxima */
+    box-shadow: 0px 0px 0.625rem rgba(0, 0, 0, 0.2);
+    border-radius: 0.3125rem;
+    margin: 1rem auto; /* Adicionar margem para centralizar melhor */
+    text-align: center;
+}
+
+td {
+    padding: 0.625rem;
+    text-align: center; /* Centralizar conteúdo */
+}
+
+input.username-input {
+    width: 90%; /* Ajustar para ocupar menos espaço */
+    padding: 0.625rem; /* Aumentar espaço interno */
+    margin: 0.5rem auto; /* Adicionar espaçamento interno */
+    box-sizing: border-box;
+    font-size: 1rem; /* Tornar texto maior */
+}
+
+button.add-friend-button {
+    padding: 0.75rem 1.5rem; /* Maior botão */
+    font-size: 1rem; /* Tornar o texto maior */
+    margin-top: 1rem; /* Espaço entre input e botão */
+    color: #fff;
+    background-color: rgb(76, 76, 76);
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.message {
+    display: block;
+    font-size: 1rem; /* Tamanho do texto */
+    text-align: center; /* Centralizar o texto */
+    font-weight: bold; /* Texto em negrito */
+    color: inherit; /* Cor herdada */
+    min-height: 1.5rem; /* Altura mínima fixa */
+    line-height: 1.5rem; /* Alinhamento vertical */
+    visibility: hidden; /* Oculta a mensagem quando vazia */
+}
+
+/* Quando há uma mensagem, torna o texto visível */
+.message.success,
+.message.error,
+.message.neutral {
+    visibility: visible; /* Torna o texto visível */
+}
+
+/* Cores das mensagens */
+.message.success {
+    color: #4caf50; /* Verde */
+}
+
+.message.error {
+    color: #f44336; /* Vermelho */
+}
+
+.message.neutral {
+    color: #000; /* Preto */
+}
+
+
+
+.friend-requests-container {
+    margin-top: 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza a tabela horizontalmente */
+    justify-content: center; /* Centraliza a tabela verticalmente (se necessário) */
+}
+
+.table-wrapper {
+    max-height: 200px; /* Define a altura máxima com scroll */
+    overflow-y: auto; /* Adiciona scroll vertical quando necessário */
+    border: none; /* Remove a borda ao redor */
+    border-radius: 0; /* Remove bordas arredondadas */
+    padding: 0; /* Remove padding adicional */
+    margin: 0 auto;
+    width: 80%; /* Ajusta a largura */
+}
+
+.friend-requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto; /* Garante que a tabela esteja centralizada dentro do contêiner */
+    border: none; /* Remove borda da tabela */
+}
+
+.friend-requests-table th,
+.friend-requests-table td {
+    border: 1px solid #ddd; /* Mantém a borda apenas nas células */
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.friend-requests-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.friend-requests-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.friend-requests-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.accept-button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.reject-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.accept-button:hover {
+    background-color: #45a049;
+}
+
+.reject-button:hover {
+    background-color: #d32f2f;
+}
