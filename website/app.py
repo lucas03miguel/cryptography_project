@@ -9,6 +9,7 @@ app = Flask(__name__)
 logger = logging.getLogger('logger')
 
 
+
 app.config['SESSION_PERMANENT'] = False
 
 
@@ -17,6 +18,8 @@ def restrict_methods():
     allowed_methods = ['GET', 'POST']
     if request.method not in allowed_methods:
         abort(405) 
+
+
 
 
 
@@ -44,6 +47,7 @@ def home():
         return redirect("/index")
     
     return render_template("open.html")
+
 
 
 
@@ -81,6 +85,8 @@ def login():
             if not result:
                 return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
+                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
+
 
             stored_hash, stored_salt, mfa_enabled, totp_secret = result
             salt_bytes = binascii.unhexlify(stored_salt.encode('utf-8'))
@@ -100,6 +106,7 @@ def login():
                 session['user'] = username
                 resp = make_response(render_template('login.html', 
                                                      message="Login successful!", 
+                                                     message="Login successful!", 
                                                      message_type="success", 
                                                      redirect=True, 
                                                      redirect_url="/index"))
@@ -107,6 +114,7 @@ def login():
                     resp.set_cookie('remembered_username', username, max_age=86400, secure=True, httponly=True, samesite='Strict')
                 return resp
             else:
+                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
                 return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
         except Exception as e:
