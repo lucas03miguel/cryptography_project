@@ -103,24 +103,12 @@
                     </table>
                 </div>
             {% else %}
-                <p>No friend requests received.</p>
+                <p style="color: red;">No friend requests received.</p>
             {% endif %}
         </div>
         
     {% endif %}
 
-    <script>
-        // Verificar se existe uma mensagem visível e com conteúdo
-        window.addEventListener('load', function () {
-            const messageDiv = document.querySelector('.message');
-            if (messageDiv && messageDiv.textContent.trim() !== '') {
-                // Definir um timer para remover a mensagem após 3 segundos
-                setTimeout(() => {
-                    // Recarregar a página sem mensagens
-                    window.location.href = window.location.pathname;
-                }, 3000); // 3 segundos
-            }
-        });
-    </script>
+    <script src="/static/js/addFriends.js"></script>
 </body>
 </html>

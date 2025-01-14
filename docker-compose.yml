@@ -42,3 +42,7 @@ services:
       SSL_KEY_PATH: /myCA/server.key
     command: >
       bash -c "nginx -t && service nginx start && python /app/app.py"
+
+volumes:
+  db_data:
+    driver: local

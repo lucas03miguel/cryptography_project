@@ -2,30 +2,30 @@ table {
     border: 1px solid #ccc;
     background-color: #f1f1f1;
     width: 100%;
-    max-width: 25rem; /* Aumentar largura máxima */
+    max-width: 25rem;
     box-shadow: 0px 0px 0.625rem rgba(0, 0, 0, 0.2);
     border-radius: 0.3125rem;
-    margin: 1rem auto; /* Adicionar margem para centralizar melhor */
+    margin: 1rem auto;
     text-align: center;
 }
 
 td {
     padding: 0.625rem;
-    text-align: center; /* Centralizar conteúdo */
+    text-align: center;
 }
 
 input.username-input {
-    width: 90%; /* Ajustar para ocupar menos espaço */
-    padding: 0.625rem; /* Aumentar espaço interno */
-    margin: 0.5rem auto; /* Adicionar espaçamento interno */
+    width: 90%; 
+    padding: 0.625rem;
+    margin: 0.5rem auto;
     box-sizing: border-box;
-    font-size: 1rem; /* Tornar texto maior */
+    font-size: 1rem;
 }
 
 button.add-friend-button {
-    padding: 0.75rem 1.5rem; /* Maior botão */
-    font-size: 1rem; /* Tornar o texto maior */
-    margin-top: 1rem; /* Espaço entre input e botão */
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    margin-top: 1rem;
     color: #fff;
     background-color: rgb(76, 76, 76);
     border: none;
@@ -36,33 +36,28 @@ button.add-friend-button {
 
 .message {
     display: block;
-    font-size: 1rem; /* Tamanho do texto */
-    text-align: center; /* Centralizar o texto */
-    font-weight: bold; /* Texto em negrito */
-    color: inherit; /* Cor herdada */
-    min-height: 1.5rem; /* Altura mínima fixa */
-    line-height: 1.5rem; /* Alinhamento vertical */
-    visibility: hidden; /* Oculta a mensagem quando vazia */
+    font-size: 1rem;
+    text-align: center;
+    font-weight: bold;
+    color: inherit;
+    min-height: 1.5rem;
+    line-height: 1.5rem;
+    visibility: hidden;
 }
 
-/* Quando há uma mensagem, torna o texto visível */
-.message.success,
-.message.error,
-.message.neutral {
-    visibility: visible; /* Torna o texto visível */
-}
-
-/* Cores das mensagens */
 .message.success {
-    color: #4caf50; /* Verde */
+    visibility: visible;
+    color: rgb(76, 175, 80);
 }
 
 .message.error {
-    color: #f44336; /* Vermelho */
+    visibility: visible;
+    color: rgb(244, 67, 54);
 }
 
 .message.neutral {
-    color: #000; /* Preto */
+    visibility: visible;
+    color: black;
 }
 
 
@@ -72,30 +67,30 @@ button.add-friend-button {
     text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centraliza a tabela horizontalmente */
-    justify-content: center; /* Centraliza a tabela verticalmente (se necessário) */
+    align-items: center;
+    justify-content: center;
 }
 
 .table-wrapper {
-    max-height: 200px; /* Define a altura máxima com scroll */
-    overflow-y: auto; /* Adiciona scroll vertical quando necessário */
-    border: none; /* Remove a borda ao redor */
-    border-radius: 0; /* Remove bordas arredondadas */
-    padding: 0; /* Remove padding adicional */
+    max-height: 200px;
+    overflow-y: auto; 
+    border: none;
+    border-radius: 0; 
+    padding: 0;
     margin: 0 auto;
-    width: 80%; /* Ajusta a largura */
+    width: 80%;
 }
 
 .friend-requests-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 0 auto; /* Garante que a tabela esteja centralizada dentro do contêiner */
-    border: none; /* Remove borda da tabela */
+    margin: 0 auto;
+    border: none;
 }
 
 .friend-requests-table th,
 .friend-requests-table td {
-    border: 1px solid #ddd; /* Mantém a borda apenas nas células */
+    border: 1px solid #ddd; 
     padding: 0.75rem;
     text-align: center;
 }
