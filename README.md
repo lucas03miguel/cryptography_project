@@ -5,6 +5,8 @@ Este projeto demonstra a configuração de um website seguro com HTTPS usando Fl
 
 ## Como Executar o Projeto
 
+Certifica-te que estás a correr num ambiente Debian/Ubuntu ou WSL e que tens docker instalado
+
 Para visualizar o website localmente, corre o seguinte comando no terminal:
 
 ```bash
