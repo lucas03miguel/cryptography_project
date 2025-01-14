@@ -85,7 +85,6 @@ def login():
             if not result:
                 return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
-                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
 
             stored_hash, stored_salt, mfa_enabled, totp_secret = result
@@ -106,7 +105,6 @@ def login():
                 session['user'] = username
                 resp = make_response(render_template('login.html', 
                                                      message="Login successful!", 
-                                                     message="Login successful!", 
                                                      message_type="success", 
                                                      redirect=True, 
                                                      redirect_url="/index"))
@@ -114,7 +112,6 @@ def login():
                     resp.set_cookie('remembered_username', username, max_age=86400, secure=True, httponly=True, samesite='Strict')
                 return resp
             else:
-                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
                 return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
 
         except Exception as e:

@@ -1,7 +1,3 @@
-<!-- MODIFICAR -->
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -38,55 +34,49 @@
             <hr>
         </div>
 
-        <div class="form-container">
-            <div class="form-block">
-                <form action="/talk_with_friends" method="POST">
-                    <!-- Token CSRF -->
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td><label>Friend's Username</label></td>
-                                <td>
-                                    <input type="text" placeholder="Enter Friend's Username" name="friend_username" 
-                                        autocomplete="off" oninvalid="this.setCustomValidity('Friend\'s Username is required!')"
-                                        oninput="this.setCustomValidity('')" required>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><label>Message</label></td>
-                                <td>
-                                    <textarea placeholder="Enter Message" name="message" 
-                                        autocomplete="off" oninvalid="this.setCustomValidity('Message is required!')"
-                                        oninput="this.setCustomValidity('')" required></textarea>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" style="padding: 0;">
-                                    <div id="message-td" style="padding: 0;">
-                                        {% if message %}
-                                        <div class="message {{ message_type }}">
-                                            {{ message }}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" style="padding: 0;">
-                                    <button type="submit" class="button">Send Message</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
+        <div class="messenger-container">
+            <!-- Lista de Amigos -->
+            <div class="friends-list">
+                <ul>
+                    {% set friends = [
+                        {'id': 1, 'username': 'Alice'},
+                        {'id': 2, 'username': 'Bob'},
+                        {'id': 3, 'username': 'Charlie'},
+                        {'id': 4, 'username': 'Dave'}
+                    ] %}
+                    {% for friend in friends %}
+                    <li class="{% if friend.id == 1 %}active{% endif %}">
+                        {{ friend.username }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+    
+            <!-- Caixa de Chat -->
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h3>Chat with Alice</h3>
+                </div>
+                <div class="chat-box">
+                    {% set messages = [
+                        {'sender_id': 1, 'text': 'Hi Alice, how are you?'},
+                        {'sender_id': 2, 'text': "I'm good! How about you?"}
+                    ] %}
+                    {% for message in messages %}
+                    <div class="chat-message {% if message.sender_id == 1 %}sent{% else %}received{% endif %}">
+                        <p>{{ message.text }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="chat-input">
+                    <form action="/send_message" method="POST">
+                        <input type="hidden" name="csrf_token" value="dummy_token">
+                        <textarea name="message" rows="2" placeholder="Type a message..." required></textarea>
+                        <button type="submit">Send</button>
+                    </form>
+                </div>
             </div>
         </div>
     {% endif %}
-
-
-
 </body>
-
-
 </html>
