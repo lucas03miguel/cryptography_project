@@ -5,23 +5,6 @@ body {
     background-color: #f4f4f4;
 }
 
-.back-button {
-    margin: 10px;
-}
-
-.back-button-style {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.back-button-style:hover {
-    background-color: #0056b3;
-}
 
 .header {
     text-align: center;
@@ -30,9 +13,10 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
+
 .messenger-container {
     display: flex;
-    height: 70vh; /* Reduz a altura total do container */
+    height: 70vh;
     max-width: 1200px;
     margin: 20px auto;
     background-color: #fff;
@@ -41,12 +25,14 @@ body {
     overflow: hidden;
 }
 
+
 .friends-list {
     width: 25%;
     border-right: 1px solid #ddd;
     overflow-y: auto;
     background-color: #f9f9f9;
 }
+
 
 .friends-list h3 {
     text-align: center;
@@ -58,16 +44,19 @@ body {
     color: #333;
 }
 
+
 .friends-list ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
+
 .friends-list li {
     padding: 10px;
     border-bottom: 1px solid #f0f0f0;
 }
+
 
 .friend-button {
     width: 100%;
@@ -84,9 +73,11 @@ body {
     align-items: center;
 }
 
+
 .friend-button:hover {
     background-color: #0056b3;
 }
+
 
 .chat-container {
     flex: 1;
@@ -94,6 +85,7 @@ body {
     flex-direction: column;
     background-color: #fff;
 }
+
 
 .chat-header {
     padding: 15px;
@@ -104,6 +96,7 @@ body {
     color: #333;
 }
 
+
 .chat-box {
     flex: 1;
     padding: 15px;
@@ -111,18 +104,22 @@ body {
     background-color: #fafafa;
 }
 
+
 .chat-message {
     display: flex;
     margin-bottom: 10px;
 }
 
+
 .chat-message.sent {
     justify-content: flex-end;
 }
 
+
 .chat-message.received {
     justify-content: flex-start;
 }
+
 
 .chat-message p {
     max-width: 70%;
@@ -131,15 +128,18 @@ body {
     margin: 0;
 }
 
+
 .chat-message.sent p {
-    background-color: #dcf8c6; /* Verde claro para mensagens enviadas */
+    background-color: #dcf8c6;
     text-align: right;
 }
 
+
 .chat-message.received p {
-    background-color: #ececec; /* Cinza claro para mensagens recebidas */
+    background-color: #ececec; 
     text-align: left;
 }
+
 
 .chat-input {
     padding: 10px;
@@ -148,6 +148,7 @@ body {
     background-color: #f9f9f9;
 }
 
+
 .chat-input textarea {
     flex: 1;
     resize: none;
@@ -155,10 +156,11 @@ body {
     border-radius: 5px;
     padding: 10px;
     font-size: 16px;
-    height: 60px; /* Reduz a altura */
-    width: calc(100% - 0px); /* Aumenta o comprimento */
-    margin-right: 10px; /* Espaço entre o textarea e o botão */
+    height: 60px; 
+    width: calc(100% - 0px);
+    margin-right: 10px; 
 }
+
 
 .chat-input button {
     padding: 10px 20px;
@@ -168,8 +170,9 @@ body {
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
-    width: 600px; /* Define o tamanho do botão */
+    width: 600px;
 }
+
 
 .chat-input button:hover {
     background-color: #0056b3;

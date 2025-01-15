@@ -24,7 +24,6 @@ services:
       - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
       - "./website:/app"
       - "./certificates:/certificates"
-      #- "./certificates/Message_Userkeys:/certificates/Message_Userkeys"
     ports:
       - "80:80"
       - "443:443"

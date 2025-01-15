@@ -19,8 +19,8 @@ app = Flask(__name__)
 logger = logging.getLogger('logger')
 
 
-
 app.config['SESSION_PERMANENT'] = False
+
 
 
 @app.before_request
@@ -28,8 +28,6 @@ def restrict_methods():
     allowed_methods = ['GET', 'POST']
     if request.method not in allowed_methods:
         abort(405) 
-
-
 
 
 
@@ -89,11 +87,13 @@ def login():
             query = "SELECT password, salt FROM users WHERE username = %s"
             cur.execute(query, (username,))
             result = cur.fetchone()
+            print("YESSSS", result)
             conn.close()
 
             if not result:
+                print("BROOOOOOOOOOOOOOOOOOOOO")
                 return render_template('login.html', message="Invalid credentials!", message_type="error")
-
+            print("AHNNNN")
 
             stored_hash, stored_salt = result
             salt_bytes = binascii.unhexlify(stored_salt.encode('utf-8'))
@@ -135,6 +135,7 @@ def login():
                     resp.set_cookie('remembered_username', username, max_age=86400, secure=True, httponly=True, samesite='Strict')
                 return resp
             else:
+                print("ISDIFDINFSDINODFS")
                 return render_template('login.html', message="Invalid credentials!", message_type="error")
 
         except Exception as e:
@@ -143,10 +144,6 @@ def login():
     
     return render_template("login.html")
     
-    
-
-    
-
 
 
 
@@ -250,7 +247,7 @@ def generate_certificate(username, usage):
     with open("/certificates/ca.crt", "rb") as ca_cert_file:
         ca_cert = x509.load_pem_x509_certificate(ca_cert_file.read())
 
-    # Construir CSR e Certificado
+
     csr = x509.CertificateSigningRequestBuilder().subject_name(
         x509.Name([
             x509.NameAttribute(NameOID.COMMON_NAME, f"{username} ({usage})"),
@@ -282,7 +279,6 @@ def generate_certificate(username, usage):
         .sign(ca_private_key, hashes.SHA256())
     )
 
-    # Extração da chave pública em formato PEM
     public_key_pem = cert.public_key().public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -300,18 +296,14 @@ def save_private_key(username, private_key, password):
     :param password: Senha derivada (bytes).
     """
 
-    # Caminho base para a pasta `Message_Userkeys` no diretório raiz
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../certificates"))
     user_keys_dir = os.path.join(base_dir, "Message_Userkeys")
 
-    # Subdiretório do utilizador (apenas o nome do utilizador)
     user_dir = os.path.join(user_keys_dir, username)
     os.makedirs(user_dir, exist_ok=True)
 
-    # Caminho completo para o ficheiro (msg_{username}_private.pem)
     filename = os.path.join(user_dir, f"msg_{username}_private.pem")
 
-    # Salvar a chave privada no ficheiro
     with open(filename, "wb") as f:
         f.write(private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -357,7 +349,6 @@ def add_friends():
     conn = get_db()
     cur = conn.cursor()
 
-    # Obter pedidos de amizade recebidos
     cur.execute("""
         SELECT sender FROM friend_requests 
         WHERE receiver = %s AND status = 'pending'
@@ -367,14 +358,12 @@ def add_friends():
     if request.method == 'POST':
         friend_username = escape(request.form['friend_username'])
 
-        # Verificar se o utilizador está a tentar adicionar a si próprio
         if username == friend_username:
             return render_template("addFriends.html", is_authenticated=True, 
                                    message="You cannot send a friend request to yourself.", 
                                    message_type="error", 
                                    friend_requests=friend_requests)
 
-        # Verificar se o amigo existe
         cur.execute("SELECT * FROM users WHERE username = %s", (friend_username,))
         friend = cur.fetchone()
 
@@ -384,7 +373,6 @@ def add_friends():
                                    message_type="error", 
                                    friend_requests=friend_requests)
 
-        # Verificar se já existe um pedido de amizade pendente
         cur.execute("""
             SELECT * FROM friend_requests 
             WHERE sender = %s AND receiver = %s AND status = 'pending'
@@ -400,7 +388,6 @@ def add_friends():
                 friend_requests=friend_requests
             )
 
-        # Verificar se já existe uma amizade entre os dois utilizadores
         cur.execute("""
             SELECT * FROM friends 
             WHERE (user1 = %s AND user2 = %s) OR (user1 = %s AND user2 = %s)
@@ -416,14 +403,12 @@ def add_friends():
                 friend_requests=friend_requests
             )
 
-        # Adicionar pedido de amizade
         cur.execute("""
             INSERT INTO friend_requests (sender, receiver, status)
             VALUES (%s, %s, %s)
         """, (username, friend_username, 'pending'))
         conn.commit()
 
-        # Sucesso
         return render_template("addFriends.html", is_authenticated=True, 
                                message="Friend request sent successfully!", 
                                message_type="success", 
@@ -431,7 +416,6 @@ def add_friends():
 
     conn.close()
 
-    # Renderizar a página com os pedidos de amizade recebidos
     return render_template("addFriends.html", is_authenticated=True, friend_requests=friend_requests)
 
 
@@ -439,7 +423,6 @@ def add_friends():
 @app.route("/manage_friend_request", methods=["GET", "POST"])
 def manage_friend_request():
     if request.method == "GET":
-        # Retorna uma mensagem ou redireciona, já que essa rota é para POST.
         return redirect("/add_friends")
     
     if 'route' not in session:
@@ -516,7 +499,6 @@ def talk_with_friends():
 
     username = session['user']
 
-    # Conectar à base de dados e buscar os amigos do utilizador
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
@@ -527,7 +509,6 @@ def talk_with_friends():
     friends = cur.fetchall()
     conn.close()
 
-    # Converter a lista de amigos para um formato utilizável
     friends_list = [friend[0] for friend in friends]
 
     return render_template("talkWithFriends.html", is_authenticated=True, friends=friends_list)
@@ -542,7 +523,6 @@ def talk_with_specific_friend(friend):
 
     username = session['user']
 
-    # Conectar à base de dados e buscar os amigos do utilizador
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
@@ -554,7 +534,6 @@ def talk_with_specific_friend(friend):
 
     friends_list = [friend[0] for friend in friends]
 
-    # Buscar as mensagens entre o utilizador e o amigo selecionado
     cur.execute("""
         SELECT sender, message, signature, sender_encrypted_message, sent_at FROM conversation_messages
         WHERE conversation_id = (
@@ -592,7 +571,6 @@ def talk_with_specific_friend(friend):
     for msg in messages:
         try:
             if username == msg["sender"]:
-                # Desencriptar com a mensagem para o remetente
                 decrypted_message = private_key.decrypt(
                     msg["sender_encrypted_message"],
                     padding.OAEP(
@@ -602,7 +580,6 @@ def talk_with_specific_friend(friend):
                     )
                 )
             else:
-                # Desencriptar com a mensagem para o destinatário
                 decrypted_message = private_key.decrypt(
                     msg["encrypted_message"],
                     padding.OAEP(
@@ -613,10 +590,8 @@ def talk_with_specific_friend(friend):
                 )
 
 
-            # Obter a chave pública do remetente
             sender_public_key = get_sender_public_key(msg["sender"])
 
-            # Verificar a assinatura
             sender_public_key.verify(
                 msg["signature"],
                 msg["encrypted_message"],
@@ -627,7 +602,6 @@ def talk_with_specific_friend(friend):
                 hashes.SHA256()
             )
 
-            # Se a assinatura for válida, adicione à lista
             decrypted_messages.append({
                 "sender": msg["sender"],
                 "message": decrypted_message.decode('utf-8'),
@@ -648,12 +622,15 @@ def talk_with_specific_friend(friend):
 
 
 
-@app.route("/send_message", methods=['POST'])
+@app.route("/send_message", methods=['GET', 'POST'])
 def send_message():
     is_authenticated = 'user' in session
     if not is_authenticated:
         return redirect("/login")
 
+    if request.method == 'GET':
+        return redirect("/talk_with_friends")
+    
     username = session['user']
     friend = request.form.get('friend')
     message = request.form.get('message')
@@ -662,17 +639,17 @@ def send_message():
         flash("Friend or message is missing.", "error")
         return redirect(f"/talk_with_friends/{friend}")
 
-    # Obter a chave pública do destinatário
+
     conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT msg_public_key FROM users WHERE username = %s", (friend,))
     recipient_public_key_pem = cur.fetchone()[0]
     recipient_public_key = serialization.load_pem_public_key(recipient_public_key_pem.encode('utf-8'))
 
-    # Obter a chave pública do remetente
+
     sender_public_key = get_sender_public_key(username)
 
-    # Encriptar a mensagem para o destinatário
+
     encrypted_message = recipient_public_key.encrypt(
         message.encode('utf-8'),
         padding.OAEP(
@@ -682,7 +659,7 @@ def send_message():
         )
     )
 
-    # Encriptar a mensagem para o remetente
+
     sender_encrypted_message = sender_public_key.encrypt(
         message.encode('utf-8'),
         padding.OAEP(
@@ -692,7 +669,7 @@ def send_message():
         )
     )
 
-    # Obter a chave privada do remetente para assinar a mensagem
+
     cur.execute("SELECT password FROM users WHERE username = %s", (username,))
     key_hex = cur.fetchone()[0]
     key = binascii.unhexlify(key_hex)
@@ -704,7 +681,7 @@ def send_message():
             password=key
         )
 
-    # Assinar a mensagem encriptada para o destinatário
+
     signature = private_key.sign(
         encrypted_message,
         padding.PSS(
@@ -714,7 +691,7 @@ def send_message():
         hashes.SHA256()
     )
 
-    # Inserir a mensagem no banco de dados
+
     cur.execute("""
         INSERT INTO conversation_messages (conversation_id, sender, message, signature, sender_encrypted_message)
         VALUES (
@@ -725,9 +702,9 @@ def send_message():
     """, (
         username, friend, friend, username,
         username,
-        psycopg2.Binary(encrypted_message),        # Para o destinatário
-        psycopg2.Binary(signature),                # Assinatura
-        psycopg2.Binary(sender_encrypted_message)  # Para o remetente
+        psycopg2.Binary(encrypted_message),      
+        psycopg2.Binary(signature),              
+        psycopg2.Binary(sender_encrypted_message)
     ))
     conn.commit()
     conn.close()

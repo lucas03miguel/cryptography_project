@@ -4,9 +4,6 @@ document.getElementById("loginForm").addEventListener("submit", function (event)
     const username = document.querySelector("input[name='username']").value;
     const clientCert = localStorage.getItem(`${username}_cert`);
 
-    console.log(`Username: ${username}`);
-    console.log(`Certificado: ${clientCert}`);
-
     if (clientCert) {
         const form = document.getElementById("loginForm");
         const input = document.createElement("input");
@@ -14,6 +11,9 @@ document.getElementById("loginForm").addEventListener("submit", function (event)
         input.name = `${username}_cert`;
         input.value = clientCert;
         form.appendChild(input);
+        form.submit();
+    } else {
+        const form = document.getElementById("loginForm");
         form.submit();
     }
 });
