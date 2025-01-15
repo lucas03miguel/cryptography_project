@@ -73,6 +73,7 @@ def login():
             username = request.form['username']
             password = request.form['password']
             remember = request.form.get('remember', 'off')
+    
 
             conn = get_db()
             cur = conn.cursor()
@@ -85,18 +86,21 @@ def login():
                 return render_template('login.html', message="Invalid credentials!", message_type="error")
 
 
-
             stored_hash, stored_salt, mfa_enabled, totp_secret = result
             salt_bytes = binascii.unhexlify(stored_salt.encode('utf-8'))
             key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt_bytes, 100000)
             key_hex = binascii.hexlify(key).decode('utf-8')
 
             if hmac.compare_digest(key_hex, stored_hash):
-                if 'clientCert' not in request.form:
+                print("9UHADUDFUHI", request.form)
+                if f'{username}_cert' not in request.form:
                     return render_template("login.html", message="Client certificate not found. Please try again.", message_type="error")
 
-                client_cert_base64 = request.form['clientCert']
+                
+                client_cert_base64 = request.form[f'{username}_cert']
+                print("Client Cert Base64:", client_cert_base64)
                 client_cert = base64.b64decode(client_cert_base64).decode('utf-8')
+                print("Client Cert:", client_cert)
 
                 try:
                     with open("/tmp/client_cert.pem", "w") as cert_file:
@@ -194,6 +198,7 @@ def registration():
             subprocess.run(["openssl", "genrsa", "-out", client_key, "2048"], check=True)
             subprocess.run(["openssl", "req", "-new", "-key", client_key, "-out", client_csr, "-subj", f"/CN={username}"], check=True)
             subprocess.run(["openssl", "x509", "-req", "-in", client_csr, "-CA", "../certificates/ca.crt", "-CAkey", "../certificates/ca.key", "-CAcreateserial", "-out", client_cert, "-days", "365", "-sha256"], check=True)
+
         except subprocess.CalledProcessError as e:
             logger.error(f"Error generating certificate for {username}: {e}")
             return render_template('registration.html', message="Error generating certificate. Please try again.", message_type="error")
@@ -205,7 +210,7 @@ def registration():
         encoded_cert = base64.b64encode(client_cert_data.encode('utf-8')).decode('utf-8')
 
         print("Encoded Cert:", encoded_cert)
-        return render_template('registration.html', message="User registered successfully.", message_type="success", client_cert=encoded_cert)
+        return render_template('registration.html', message="User registered successfully.", message_type="success", client_cert=encoded_cert, username=username)
         response.headers['X-Client-Cert'] = encoded_cert
 
         print("Status Code:", response.status)
