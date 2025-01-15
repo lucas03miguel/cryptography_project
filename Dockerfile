@@ -17,7 +17,7 @@ COPY ./website /app
 
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
-COPY ./myCA /etc/ssl/certs
+COPY ./certificates /etc/ssl/certs
 
 COPY ./postgresql/cripto-db-schema-pg.sql /docker-entrypoint-initdb.d/cripto-db-schema-pg.sql
 

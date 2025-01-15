@@ -29,8 +29,7 @@
 
     <div class="form-container">
         <div class="form-block">
-            <form action="/login" method="POST">
-                <!-- Token CSRF -->
+            <form id="loginForm" action="/login" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <table>
                     <tbody>
@@ -74,6 +73,8 @@
             </form>
         </div>
     </div>
+
+    <script src="/static/js/login.js"></script>
 </body>
 
 </html>

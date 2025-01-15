@@ -11,13 +11,15 @@
     <link rel="icon" type="image/ico" href="/static/img/favicon.ico">
 
     {% if message_type == 'success' %}
-    <meta http-equiv="refresh" content="2; url=/login">
+        <meta http-equiv="refresh" content="2; url=/login">
     {% endif %}
 </head>
 
 <body>
     <div class="back-button">
         <a href="/">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
             <button type="submit" class="button back-button-style">Back</button>
         </a>
     </div>
@@ -33,7 +35,6 @@
     <div class="form-container">
         <div class="form-block">
             <form action="/registration" method="POST">
-                <!-- Token CSRF -->
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <table>
                     <tbody>
@@ -68,6 +69,12 @@
                                     {{ message }}
                                 </div>
                                 {% endif %}
+                                {% if certificate_link %}
+                                <div class="download-link">
+                                    Your certificate is ready. Download it below:
+                                    <a href="{{ certificate_link }}" class="button-download">Download Certificate</a>
+                                </div>
+                                {% endif %}
                             </td>
                         </tr>
 
@@ -83,6 +90,13 @@
             
         </div>
     </div>
+    {% if message_type == 'success' %}
+    <script>
+        const clientCert = "{{ client_cert }}";
+        localStorage.setItem("clientCert", clientCert);
+        window.location.href = "/login";
+    </script>
+    {% endif %}
 
     <script src="/static/js/registration.js"></script>
 

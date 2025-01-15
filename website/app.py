@@ -1,8 +1,9 @@
-from flask import Flask, redirect, render_template, request, session, abort, make_response, url_for
+from flask import Flask, redirect, render_template, request, send_file, session, abort, make_response, url_for
 import logging
 from database import get_db
 from markupsafe import escape
-import os, logging, hashlib, binascii, hmac
+import os, logging, hashlib, binascii, subprocess, base64, hmac
+
 from extensions import csrf
 
 app = Flask(__name__)
@@ -29,7 +30,6 @@ def restrict_methods():
 ##########################################################
 @app.route("/", methods=['GET', 'POST'])
 def home():
-
     session['valid_access'] = True
     session['route'] = '/'
     
@@ -51,7 +51,6 @@ def home():
 
 
 
-
 ##########################################################
 ## Login Page
 ##########################################################
@@ -66,9 +65,9 @@ def login():
     if not session.get('valid_access') and session['route'] != 'login':
         session['route'] = 'login'
         return redirect("/login")
-
+    
     session['route'] = 'login'
-
+    
     if request.method == 'POST':
         try:
             username = request.form['username']
@@ -83,7 +82,7 @@ def login():
             conn.close()
 
             if not result:
-                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
+                return render_template('login.html', message="Invalid credentials!", message_type="error")
 
 
 
@@ -93,32 +92,58 @@ def login():
             key_hex = binascii.hexlify(key).decode('utf-8')
 
             if hmac.compare_digest(key_hex, stored_hash):
+                if 'clientCert' not in request.form:
+                    return render_template("login.html", message="Client certificate not found. Please try again.", message_type="error")
+
+                client_cert_base64 = request.form['clientCert']
+                client_cert = base64.b64decode(client_cert_base64).decode('utf-8')
+
+                try:
+                    with open("/tmp/client_cert.pem", "w") as cert_file:
+                        cert_file.write(client_cert)
+
+                    result = subprocess.run(
+                        ["openssl", "x509", "-in", "/tmp/client_cert.pem", "-noout", "-subject"],
+                        capture_output=True,
+                        text=True
+                    )
+                    subject = result.stdout.strip()
+                    print("Subject:", subject)
+
+                    if "CN =" in subject:
+                        username = subject.split("CN = ")[1].split(",")[0]
+                        print("Extracted Username:", username)
+                        session["user"] = username
+                    else:
+                        return render_template("login.html", message="Authorization failed. Please try again.", message_type="error")
+
+                except Exception as e:
+                    print("Error decoding client certificate:", str(e))
+                    return render_template("login.html", message="Error with client certificate.", message_type="error")
+                                
+
                 if mfa_enabled:
                     session['mfa_pending'] = username
                     session['totp_secret'] = totp_secret
-                    return make_response(render_template('login.html', 
-                                                         message="Redirecting to MFA...", 
-                                                         message_type="success", 
-                                                         redirect=True, 
-                                                         redirect_url="/validate_mfa"))
-
+                    return render_template('login.html', message="Redirecting to MFA...", message_type="success", redirect=True, redirect_url="/validate_mfa")
+                
                 session['user'] = username
-                resp = make_response(render_template('login.html', 
-                                                     message="Login successful!", 
-                                                     message_type="success", 
-                                                     redirect=True, 
-                                                     redirect_url="/index"))
+                resp = make_response(render_template('login.html', message="Login successful!", message_type="success", redirect=True, redirect_url="/index"))
                 if remember == 'on':
                     resp.set_cookie('remembered_username', username, max_age=86400, secure=True, httponly=True, samesite='Strict')
                 return resp
             else:
-                return make_response(render_template('login.html', message="Invalid credentials!", message_type="error"))
+                return render_template('login.html', message="Invalid credentials!", message_type="error")
 
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
-            return make_response(render_template('login.html', message="An error occurred during login. Please try again.", message_type="error"))
+            return render_template('login.html', message="An error occurred during login. Please try again.", message_type="error")
     
     return render_template("login.html")
+    
+    
+
+    
 
 
 
@@ -127,19 +152,16 @@ def login():
 ## Registration
 ##########################################################
 @app.route("/registration", methods=['GET', 'POST'])
-def part1_registration():
+def registration():
     session['route'] = 'registration'
 
-    is_authenticated = 'user' in session
-    if is_authenticated:
+    if 'user' in session:
         return redirect("/index")
-    
+
     if request.method == 'POST':
         username = escape(request.form['username'])
         password = escape(request.form['password'])
 
-        print(f"Username: {username}")
-        print(f"Password: {password}")
         conn = get_db()
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE username = %s", (username,))
@@ -148,31 +170,65 @@ def part1_registration():
 
         if len(rows) > 0:
             return render_template('registration.html', message="Registration was unsuccessful. Please try again.", message_type="error")
-        else:
-            salt = os.urandom(16)
 
-            key = hashlib.pbkdf2_hmac(
-                'sha256', 
-                password.encode('utf-8'), 
-                salt, 
-                100000
-            )
-            
-            salt_hex = binascii.hexlify(salt).decode('utf-8')
-            key_hex = binascii.hexlify(key).decode('utf-8')
+        salt = os.urandom(16)
+        key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+        salt_hex = binascii.hexlify(salt).decode('utf-8')
+        key_hex = binascii.hexlify(key).decode('utf-8')
 
-            conn = get_db()
-            cur = conn.cursor()
-            cur.execute(
-                "INSERT INTO users (username, password, salt) VALUES (%s, %s, %s)", 
-                (username, key_hex, salt_hex,)
-            )
-            conn.commit()
-            conn.close()
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO users (username, password, salt) VALUES (%s, %s, %s)", (username, key_hex, salt_hex))
+        conn.commit()
+        conn.close()
 
-            return render_template('registration.html', message="User created successfully. Redirecting to login page...", message_type="success")
-    
+        cert_dir = f"../certificates/clients/{username}"
+        if not os.path.exists(cert_dir):
+            os.makedirs(cert_dir)
+
+        client_key = f"{cert_dir}/{username}-key.pem"
+        client_csr = f"{cert_dir}/{username}.csr"
+        client_cert = f"{cert_dir}/{username}-cert.pem"
+
+        try:
+            subprocess.run(["openssl", "genrsa", "-out", client_key, "2048"], check=True)
+            subprocess.run(["openssl", "req", "-new", "-key", client_key, "-out", client_csr, "-subj", f"/CN={username}"], check=True)
+            subprocess.run(["openssl", "x509", "-req", "-in", client_csr, "-CA", "../certificates/ca.crt", "-CAkey", "../certificates/ca.key", "-CAcreateserial", "-out", client_cert, "-days", "365", "-sha256"], check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error generating certificate for {username}: {e}")
+            return render_template('registration.html', message="Error generating certificate. Please try again.", message_type="error")
+
+
+        with open(client_cert, 'r') as cert_file:
+            client_cert_data = cert_file.read()
+
+        encoded_cert = base64.b64encode(client_cert_data.encode('utf-8')).decode('utf-8')
+
+        print("Encoded Cert:", encoded_cert)
+        return render_template('registration.html', message="User registered successfully.", message_type="success", client_cert=encoded_cert)
+        response.headers['X-Client-Cert'] = encoded_cert
+
+        print("Status Code:", response.status)
+        print("Headers:", response.headers)
+        print("Body:", response.get_data(as_text=True))
+
+        return response
+
     return render_template("registration.html")
+
+
+
+
+##########################################################
+# Download certificate
+##########################################################
+@app.route("/download_cert/<username>")
+def download_cert(username):
+    cert_path = f"../certificates/clients/{username}/{username}-cert.pem"
+    if os.path.exists(cert_path):
+        return send_file(cert_path, as_attachment=True)
+    else:
+        return "Certificate not found!", 404
 
 
 
@@ -183,7 +239,6 @@ def part1_registration():
 @app.route("/index", methods=['GET', 'POST'])
 def index():
     is_authenticated = 'user' in session
-
     session['route'] = 'index'
 
     if not is_authenticated:

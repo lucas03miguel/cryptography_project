@@ -45,13 +45,13 @@
                         {'id': 4, 'username': 'Dave'}
                     ] %}
                     {% for friend in friends %}
-                    <li class="{% if friend.id == 1 %}active{% endif %}">
-                        {{ friend.username }}
-                    </li>
+                        <li class="{% if friend.id == 1 %}active{% endif %}">
+                            {{ friend.username }}
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
-    
+            
             <!-- Caixa de Chat -->
             <div class="chat-container">
                 <div class="chat-header">
