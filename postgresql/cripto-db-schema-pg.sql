@@ -1,43 +1,65 @@
+-- Apaga tabelas se já existirem
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS friend_requests;
+DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS conversations;
+DROP TABLE IF EXISTS conversation_messages;
 
+-- Criação da tabela de utilizadores
 CREATE TABLE users (
-    username    VARCHAR( 32)    primary key,
-    password    VARCHAR(512)    NOT NULL,
-    salt        VARCHAR(512)    NOT NULL
+    username    VARCHAR(32) PRIMARY KEY,
+    password    VARCHAR(512) NOT NULL,
+    salt        VARCHAR(512) NOT NULL,
+    msg_public_key TEXT NOT NULL   -- Certificado de mensagens (PEM)
 );
 
+-- Criação da tabela de pedidos de amizade
 CREATE TABLE friend_requests (
     id SERIAL PRIMARY KEY,
     sender VARCHAR(32) NOT NULL,
     receiver VARCHAR(32) NOT NULL,
     status VARCHAR(50) DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (receiver) REFERENCES users(username) ON DELETE CASCADE
 );
 
+-- Criação da tabela de amigos
 CREATE TABLE friends (
     id SERIAL PRIMARY KEY,
     user1 VARCHAR(32) NOT NULL,
     user2 VARCHAR(32) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user1) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (user2) REFERENCES users(username) ON DELETE CASCADE
 );
 
-CREATE TABLE messages (
-    message_id  SERIAL PRIMARY KEY,
-    author      VARCHAR( 16)   ,
-    message     VARCHAR(256)    NOT NULL
+-- Criação da tabela de conversas
+CREATE TABLE conversations (
+    conversation_id SERIAL PRIMARY KEY,
+    user1 VARCHAR(32) NOT NULL,
+    user2 VARCHAR(32) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user1, user2),
+    FOREIGN KEY (user1) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (user2) REFERENCES users(username) ON DELETE CASCADE
+);
+
+-- Criação da tabela de mensagens associadas a uma conversa
+CREATE TABLE conversation_messages (
+    message_id SERIAL PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    sender VARCHAR(32) NOT NULL,
+    message BYTEA NOT NULL,
+    sender_encrypted_message BYTEA NOT NULL, -- Mensagem encriptada para o remetente
+    signature BYTEA, 
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON DELETE CASCADE,
+    FOREIGN KEY (sender) REFERENCES users(username) ON DELETE CASCADE
 );
 
 
--- Default data for messages
-insert into messages (author, message)
-values ('Vulnerable', 'Hi! I wrote this message using Vulnerable Form.');
-
-insert into messages (author, message)
-values ('Correct', 'OMG! This form is so correct!!!');
-
-insert into messages (author, message)
-values ('Vulnerable', 'Oh really?');
 
 
 

@@ -37,46 +37,62 @@
         <div class="messenger-container">
             <!-- Lista de Amigos -->
             <div class="friends-list">
+                <h3>Your Friends</h3>
                 <ul>
-                    {% set friends = [
-                        {'id': 1, 'username': 'Alice'},
-                        {'id': 2, 'username': 'Bob'},
-                        {'id': 3, 'username': 'Charlie'},
-                        {'id': 4, 'username': 'Dave'}
-                    ] %}
                     {% for friend in friends %}
-                        <li class="{% if friend.id == 1 %}active{% endif %}">
-                            {{ friend.username }}
-                        </li>
+                    <li>
+                        <form action="/talk_with_friends/{{ friend }}" method="get">
+                            <button type="submit" class="friend-button">{{ friend }}</button>
+                        </form>
+                    </li>
                     {% endfor %}
                 </ul>
             </div>
-            
+        
             <!-- Caixa de Chat -->
             <div class="chat-container">
                 <div class="chat-header">
-                    <h3>Chat with Alice</h3>
+                    <h3>
+                        {% if selected_friend %}
+                        Chat with your friend {{ selected_friend }}
+                        {% else %}
+                        Chat
+                        {% endif %}
+                    </h3>
                 </div>
                 <div class="chat-box">
-                    {% set messages = [
-                        {'sender_id': 1, 'text': 'Hi Alice, how are you?'},
-                        {'sender_id': 2, 'text': "I'm good! How about you?"}
-                    ] %}
-                    {% for message in messages %}
-                    <div class="chat-message {% if message.sender_id == 1 %}sent{% else %}received{% endif %}">
-                        <p>{{ message.text }}</p>
-                    </div>
-                    {% endfor %}
+                    {% if messages %}
+                        {% for msg in messages %}
+                        <div class="chat-message {{ 'sent' if msg.sender == session['user'] else 'received' }}">
+                            <p>
+                                <strong>{{ msg.sender }}:</strong> {{ msg.message }}
+                                <span style="font-size: 0.8em; color: gray;">
+                                    ({{ msg.timestamp.strftime('%Y-%m-%d %H:%M:%S') }})
+                                </span>
+                            </p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No messages yet. Start the conversation!</p>
+                    {% endif %}
                 </div>
                 <div class="chat-input">
-                    <form action="/send_message" method="POST">
-                        <input type="hidden" name="csrf_token" value="dummy_token">
+                    {% if selected_friend %}
+                    <form action="/send_message" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <textarea name="message" rows="2" placeholder="Type a message..." required></textarea>
-                        <button type="submit">Send</button>
+                        <input type="hidden" name="friend" value="{{ selected_friend }}">
+                        <button type="submit" class="send-button">Send</button>
                     </form>
+                    {% else %}
+                    <p>Select a friend to start chatting.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
+        
+        <script src="/static/js/talkWithFriends.js"></script>
+
     {% endif %}
 </body>
 </html>
