@@ -87,13 +87,10 @@ def login():
             query = "SELECT password, salt FROM users WHERE username = %s"
             cur.execute(query, (username,))
             result = cur.fetchone()
-            print("YESSSS", result)
             conn.close()
 
             if not result:
-                print("BROOOOOOOOOOOOOOOOOOOOO")
                 return render_template('login.html', message="Invalid credentials!", message_type="error")
-            print("AHNNNN")
 
             stored_hash, stored_salt = result
             salt_bytes = binascii.unhexlify(stored_salt.encode('utf-8'))
@@ -135,7 +132,6 @@ def login():
                     resp.set_cookie('remembered_username', username, max_age=86400, secure=True, httponly=True, samesite='Strict')
                 return resp
             else:
-                print("ISDIFDINFSDINODFS")
                 return render_template('login.html', message="Invalid credentials!", message_type="error")
 
         except Exception as e:
