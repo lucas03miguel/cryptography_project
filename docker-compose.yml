@@ -23,7 +23,8 @@ services:
     volumes:
       - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
       - "./website:/app"
-      - "./myCA:/myCA"
+      - "./myCA:/myCA:ro"
+      - "./Message_Userkeys:/Message_Userkeys"
     ports:
       - "80:80"
       - "443:443"

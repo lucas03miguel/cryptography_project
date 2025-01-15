@@ -12,7 +12,8 @@ CREATE TABLE users (
     password    VARCHAR(512) NOT NULL,
     salt        VARCHAR(512) NOT NULL,
     totp_secret VARCHAR(512),   -- Chave secreta para MFA TOTP (NULL se MFA não estiver ativo)
-    mfa_enabled BOOLEAN DEFAULT FALSE -- Indica se o utilizador ativou MFA
+    mfa_enabled BOOLEAN DEFAULT FALSE, -- Indica se o utilizador ativou MFA
+    msg_public_key TEXT NOT NULL   -- Certificado de mensagens (PEM)
 );
 
 -- Criação da tabela de pedidos de amizade
@@ -52,7 +53,9 @@ CREATE TABLE conversation_messages (
     message_id SERIAL PRIMARY KEY,
     conversation_id INT NOT NULL,
     sender VARCHAR(32) NOT NULL,
-    message TEXT NOT NULL,
+    message BYTEA NOT NULL,
+    sender_encrypted_message BYTEA NOT NULL, -- Mensagem encriptada para o remetente
+    signature BYTEA, 
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON DELETE CASCADE,
     FOREIGN KEY (sender) REFERENCES users(username) ON DELETE CASCADE

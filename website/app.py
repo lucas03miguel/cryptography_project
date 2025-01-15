@@ -1,9 +1,18 @@
 from flask import Flask, redirect, render_template, request, session, abort, make_response, flash
 import logging
 from database import get_db
+import psycopg2
 from markupsafe import escape
 import os, logging, hashlib, binascii, hmac
 from extensions import csrf
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
+from cryptography.exceptions import InvalidSignature
+
+from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
 logger = logging.getLogger('logger')
@@ -138,8 +147,6 @@ def part1_registration():
         username = escape(request.form['username'])
         password = escape(request.form['password'])
 
-        print(f"Username: {username}")
-        print(f"Password: {password}")
         conn = get_db()
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE username = %s", (username,))
@@ -161,11 +168,23 @@ def part1_registration():
             salt_hex = binascii.hexlify(salt).decode('utf-8')
             key_hex = binascii.hexlify(key).decode('utf-8')
 
+            # Geração de chaves e certificados
+            msg_private_key, msg_cert, public_key_pem = generate_certificate(username, usage="Messages")
+
+            # Guardar as chaves privadas localmente (protegidas por senha)
+            save_private_key(username, msg_private_key, key)
+
+
+
+            # Guardar as chaves públicas e os certificados na base de dados
             conn = get_db()
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO users (username, password, salt) VALUES (%s, %s, %s)", 
-                (username, key_hex, salt_hex,)
+                """
+                INSERT INTO users (username, password, salt, msg_public_key) 
+                VALUES (%s, %s, %s, %s)
+                """, 
+                (username, key_hex, salt_hex, public_key_pem.decode('utf-8'))
             )
             conn.commit()
             conn.close()
@@ -173,6 +192,102 @@ def part1_registration():
             return render_template('registration.html', message="User created successfully. Redirecting to login page...", message_type="success")
     
     return render_template("registration.html")
+
+
+
+
+##########################################################
+## Geração de certificados e chaves para cada utilizador posteriormente usados nos chats
+##########################################################
+
+def generate_certificate(username, usage):
+    """
+    Gera chaves RSA e um certificado assinado pela CA.
+    :param username: Nome do utilizador.
+    :param usage: Uso da chave ("Authentication" ou "Messages").
+    :return: Par chave privada, certificado assinado e chave pública no formato PEM.
+    """
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+    )
+    public_key = private_key.public_key()
+
+    with open("/myCA/ca.key", "rb") as ca_key_file:
+        ca_private_key = serialization.load_pem_private_key(
+            ca_key_file.read(),
+            password=None
+        )
+    with open("/myCA/ca.crt", "rb") as ca_cert_file:
+        ca_cert = x509.load_pem_x509_certificate(ca_cert_file.read())
+
+    # Construir CSR e Certificado
+    csr = x509.CertificateSigningRequestBuilder().subject_name(
+        x509.Name([
+            x509.NameAttribute(NameOID.COMMON_NAME, f"{username} ({usage})"),
+        ])
+    ).sign(private_key, hashes.SHA256())
+
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(csr.subject)
+        .issuer_name(ca_cert.subject)
+        .public_key(public_key)
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.now(timezone.utc))
+        .not_valid_after(datetime.now(timezone.utc) + timedelta(days=365))
+        .add_extension(
+            x509.KeyUsage(
+                digital_signature=True,
+                key_encipherment=(usage == "Messages"),
+                content_commitment=True,
+                data_encipherment=(usage == "Messages"),
+                key_agreement=False,
+                key_cert_sign=False,
+                crl_sign=False,
+                encipher_only=False,
+                decipher_only=False
+            ),
+            critical=True,
+        )
+        .sign(ca_private_key, hashes.SHA256())
+    )
+
+    # Extração da chave pública em formato PEM
+    public_key_pem = cert.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    return private_key, cert, public_key_pem
+
+
+def save_private_key(username, private_key, password):
+    """
+    Salva uma chave privada num ficheiro protegido por uma senha derivada.
+    :param username: Nome do utilizador.
+    :param private_key: Objeto de chave privada.
+    :param password: Senha derivada (bytes).
+    """
+
+    # Caminho base para a pasta `Message_Userkeys` no diretório raiz
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))  # Subir para o diretório raiz
+    user_keys_dir = os.path.join(base_dir, "Message_Userkeys")
+
+    # Subdiretório do utilizador (apenas o nome do utilizador)
+    user_dir = os.path.join(user_keys_dir, username)
+    os.makedirs(user_dir, exist_ok=True)
+
+    # Caminho completo para o ficheiro (msg_{username}_private.pem)
+    filename = os.path.join(user_dir, f"msg_{username}_private.pem")
+
+    # Salvar a chave privada no ficheiro
+    with open(filename, "wb") as f:
+        f.write(private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.BestAvailableEncryption(password)
+        ))
 
 
 
@@ -435,31 +550,100 @@ def talk_with_specific_friend(friend):
     """, (username, username))
     friends = cur.fetchall()
 
-    # Converter a lista de amigos para um formato utilizável
     friends_list = [friend[0] for friend in friends]
 
     # Buscar as mensagens entre o utilizador e o amigo selecionado
     cur.execute("""
-        SELECT sender, message, sent_at FROM conversation_messages
+        SELECT sender, message, signature, sender_encrypted_message, sent_at FROM conversation_messages
         WHERE conversation_id = (
             SELECT conversation_id FROM conversations
             WHERE (user1 = %s AND user2 = %s) OR (user1 = %s AND user2 = %s)
         )
         ORDER BY sent_at
     """, (username, friend, friend, username))
-    messages = cur.fetchall()
+
+    messages = [
+        {
+            "sender": msg[0],
+            "encrypted_message": bytes(msg[1]),
+            "signature": bytes(msg[2]),
+            "sender_encrypted_message": bytes(msg[3]),
+            "timestamp": msg[4]
+        }
+        for msg in cur.fetchall()
+    ]
+
+    cur.execute("SELECT password FROM users WHERE username = %s", (username,))
+    key_hex = cur.fetchone()[0]
     conn.close()
 
-    # Converter mensagens para um formato utilizável no template
-    messages_list = [{"sender": msg[0], "message": msg[1], "timestamp": msg[2]} for msg in messages]
+    key = binascii.unhexlify(key_hex)
+
+    private_key_path = os.path.join("/Message_Userkeys", username, f"msg_{username}_private.pem")
+    with open(private_key_path, "rb") as key_file:
+        private_key = serialization.load_pem_private_key(
+            key_file.read(),
+            password=key
+        )
+
+    decrypted_messages = []
+    for msg in messages:
+        try:
+            if username == msg["sender"]:
+                # Desencriptar com a mensagem para o remetente
+                decrypted_message = private_key.decrypt(
+                    msg["sender_encrypted_message"],
+                    padding.OAEP(
+                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                        algorithm=hashes.SHA256(),
+                        label=None
+                    )
+                )
+            else:
+                # Desencriptar com a mensagem para o destinatário
+                decrypted_message = private_key.decrypt(
+                    msg["encrypted_message"],
+                    padding.OAEP(
+                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                        algorithm=hashes.SHA256(),
+                        label=None
+                    )
+                )
+
+
+            # Obter a chave pública do remetente
+            sender_public_key = get_sender_public_key(msg["sender"])
+
+            # Verificar a assinatura
+            sender_public_key.verify(
+                msg["signature"],
+                msg["encrypted_message"],
+                padding.PSS(
+                    mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH
+                ),
+                hashes.SHA256()
+            )
+
+            # Se a assinatura for válida, adicione à lista
+            decrypted_messages.append({
+                "sender": msg["sender"],
+                "message": decrypted_message.decode('utf-8'),
+                "timestamp": msg["timestamp"]
+            })
+        except InvalidSignature:
+            logger.error(f"Invalid signature for message from {msg['sender']}")
+        except Exception as e:
+            logger.error(f"Error processing message from {msg['sender']}: {e}")
 
     return render_template(
         "talkWithFriends.html",
         is_authenticated=True,
         friends=friends_list,
         selected_friend=friend,
-        messages=messages_list
+        messages=decrypted_messages
     )
+
 
 
 @app.route("/send_message", methods=['POST'])
@@ -472,28 +656,98 @@ def send_message():
     friend = request.form.get('friend')
     message = request.form.get('message')
 
-    # Validar entrada
     if not friend or not message:
         flash("Friend or message is missing.", "error")
         return redirect(f"/talk_with_friends/{friend}")
 
-    # Inserir a mensagem na base de dados
+    # Obter a chave pública do destinatário
     conn = get_db()
     cur = conn.cursor()
+    cur.execute("SELECT msg_public_key FROM users WHERE username = %s", (friend,))
+    recipient_public_key_pem = cur.fetchone()[0]
+    recipient_public_key = serialization.load_pem_public_key(recipient_public_key_pem.encode('utf-8'))
+
+    # Obter a chave pública do remetente
+    sender_public_key = get_sender_public_key(username)
+
+    # Encriptar a mensagem para o destinatário
+    encrypted_message = recipient_public_key.encrypt(
+        message.encode('utf-8'),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    # Encriptar a mensagem para o remetente
+    sender_encrypted_message = sender_public_key.encrypt(
+        message.encode('utf-8'),
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    # Obter a chave privada do remetente para assinar a mensagem
+    cur.execute("SELECT password FROM users WHERE username = %s", (username,))
+    key_hex = cur.fetchone()[0]
+    key = binascii.unhexlify(key_hex)
+
+    private_key_path = os.path.join("/Message_Userkeys", username, f"msg_{username}_private.pem")
+    with open(private_key_path, "rb") as key_file:
+        private_key = serialization.load_pem_private_key(
+            key_file.read(),
+            password=key
+        )
+
+    # Assinar a mensagem encriptada para o destinatário
+    signature = private_key.sign(
+        encrypted_message,
+        padding.PSS(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+
+    # Inserir a mensagem no banco de dados
     cur.execute("""
-        INSERT INTO conversation_messages (conversation_id, sender, message)
+        INSERT INTO conversation_messages (conversation_id, sender, message, signature, sender_encrypted_message)
         VALUES (
             (SELECT conversation_id FROM conversations
              WHERE (user1 = %s AND user2 = %s) OR (user1 = %s AND user2 = %s)),
-            %s, %s
+            %s, %s, %s, %s
         )
-    """, (username, friend, friend, username, username, message))
+    """, (
+        username, friend, friend, username,
+        username,
+        psycopg2.Binary(encrypted_message),        # Para o destinatário
+        psycopg2.Binary(signature),                # Assinatura
+        psycopg2.Binary(sender_encrypted_message)  # Para o remetente
+    ))
     conn.commit()
     conn.close()
 
-    # Redirecionar para recarregar a conversa
     return redirect(f"/talk_with_friends/{friend}")
 
+
+
+
+def get_sender_public_key(sender):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT msg_public_key FROM users WHERE username = %s", (sender,))
+    public_key_pem = cur.fetchone()[0]
+    conn.close()
+
+    try:
+        public_key = serialization.load_pem_public_key(public_key_pem.encode('utf-8'))
+        return public_key
+    except Exception as e:
+        logger.error(f"Failed to load public key for {sender}: {e}")
+        raise
 
 
 
