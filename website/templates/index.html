@@ -22,29 +22,6 @@
             Being redirected to the login page...
         </div>
     {% else %}
-        <!-- MFA Button -->
-        <div class="mfa-button">
-            {% if mfa_enabled %}
-                <button onclick="confirmMFA('deactivate')" class="button mfa-button-style">Deactivate MFA</button>
-            {% else %}
-                <button onclick="confirmMFA('activate')" class="button mfa-button-style">Activate MFA</button>
-            {% endif %}
-        </div>
-
-        <script>
-            function confirmMFA(action) {
-                let message = action === 'activate' 
-                    ? "Do you want to activate Multi-Factor Authentication?"
-                    : "Do you want to deactivate Multi-Factor Authentication?";
-
-                const userConfirmed = confirm(message);
-
-                if (userConfirmed) {
-                    window.location.href = action === 'activate' ? "/activate_mfa" : "/deactivate_mfa";
-                }
-            }
-        </script>
-
         <div class="back-button">
             <form method="POST" action="/logout">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

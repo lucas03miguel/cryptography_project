@@ -4,9 +4,7 @@ DROP TABLE IF EXISTS messages;
 CREATE TABLE users (
     username    VARCHAR( 32)    primary key,
     password    VARCHAR(512)    NOT NULL,
-    salt        VARCHAR(512)    NOT NULL,
-    totp_secret VARCHAR(512),   -- Chave secreta para MFA TOTP (NULL se MFA não estiver ativo)
-    mfa_enabled BOOLEAN         DEFAULT FALSE -- Indica se o utilizador ativou MFA
+    salt        VARCHAR(512)    NOT NULL
 );
 
 CREATE TABLE friend_requests (

@@ -73,11 +73,11 @@ def login():
             username = request.form['username']
             password = request.form['password']
             remember = request.form.get('remember', 'off')
-    
+
 
             conn = get_db()
             cur = conn.cursor()
-            query = "SELECT password, salt, mfa_enabled, totp_secret FROM users WHERE username = %s"
+            query = "SELECT password, salt FROM users WHERE username = %s"
             cur.execute(query, (username,))
             result = cur.fetchone()
             conn.close()
@@ -86,21 +86,17 @@ def login():
                 return render_template('login.html', message="Invalid credentials!", message_type="error")
 
 
-            stored_hash, stored_salt, mfa_enabled, totp_secret = result
+            stored_hash, stored_salt = result
             salt_bytes = binascii.unhexlify(stored_salt.encode('utf-8'))
             key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt_bytes, 100000)
             key_hex = binascii.hexlify(key).decode('utf-8')
 
             if hmac.compare_digest(key_hex, stored_hash):
-                print("9UHADUDFUHI", request.form)
                 if f'{username}_cert' not in request.form:
-                    return render_template("login.html", message="Client certificate not found. Please try again.", message_type="error")
+                    return render_template("login.html", message="Client certificate not found. New device?", message_type="error")
 
-                
                 client_cert_base64 = request.form[f'{username}_cert']
-                print("Client Cert Base64:", client_cert_base64)
                 client_cert = base64.b64decode(client_cert_base64).decode('utf-8')
-                print("Client Cert:", client_cert)
 
                 try:
                     with open("/tmp/client_cert.pem", "w") as cert_file:
@@ -112,25 +108,18 @@ def login():
                         text=True
                     )
                     subject = result.stdout.strip()
-                    print("Subject:", subject)
 
                     if "CN =" in subject:
                         username = subject.split("CN = ")[1].split(",")[0]
-                        print("Extracted Username:", username)
                         session["user"] = username
                     else:
-                        return render_template("login.html", message="Authorization failed. Please try again.", message_type="error")
+                        return render_template("login.html", message="Authentication failed. Please try again.", message_type="error")
 
                 except Exception as e:
-                    print("Error decoding client certificate:", str(e))
+                    logger.error(f"Error with client certificate: {str(e)}")
                     return render_template("login.html", message="Error with client certificate.", message_type="error")
-                                
 
-                if mfa_enabled:
-                    session['mfa_pending'] = username
-                    session['totp_secret'] = totp_secret
-                    return render_template('login.html', message="Redirecting to MFA...", message_type="success", redirect=True, redirect_url="/validate_mfa")
-                
+
                 session['user'] = username
                 resp = make_response(render_template('login.html', message="Login successful!", message_type="success", redirect=True, redirect_url="/index"))
                 if remember == 'on':
@@ -209,31 +198,9 @@ def registration():
 
         encoded_cert = base64.b64encode(client_cert_data.encode('utf-8')).decode('utf-8')
 
-        print("Encoded Cert:", encoded_cert)
         return render_template('registration.html', message="User registered successfully.", message_type="success", client_cert=encoded_cert, username=username)
-        response.headers['X-Client-Cert'] = encoded_cert
-
-        print("Status Code:", response.status)
-        print("Headers:", response.headers)
-        print("Body:", response.get_data(as_text=True))
-
-        return response
 
     return render_template("registration.html")
-
-
-
-
-##########################################################
-# Download certificate
-##########################################################
-@app.route("/download_cert/<username>")
-def download_cert(username):
-    cert_path = f"../certificates/clients/{username}/{username}-cert.pem"
-    if os.path.exists(cert_path):
-        return send_file(cert_path, as_attachment=True)
-    else:
-        return "Certificate not found!", 404
 
 
 
@@ -250,35 +217,8 @@ def index():
         return render_template("index.html", is_authenticated=False)
     
     username = session['user']
-    
-    # Fetch MFA status from the database
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT mfa_enabled FROM users WHERE username = %s", (username,))
-    result = cur.fetchone()
-    conn.close()
 
-    mfa_enabled = result[0] if result else False  # Check if MFA is enabled (True/False)
-
-    return render_template("index.html", is_authenticated=True, mfa_enabled=mfa_enabled)
-
-
-
-
-##########################################################
-## MFA
-##########################################################
-@app.route("/activate_mfa", methods=['GET', 'POST'])
-def mfa():
-    return """
-    <div class="back-button">
-        <a href="/index">
-            <button type="submit" class="button back-button-style">Back</button>
-        </a>
-    </div>
-
-    Em desenvolvimento (ou talvez não)
-    """
+    return render_template("index.html", is_authenticated=True)
 
 
 

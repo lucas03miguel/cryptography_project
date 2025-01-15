@@ -92,8 +92,7 @@
     </div>
     {% if message_type == 'success' %}
     <script>
-        const clientCert = "{{ client_cert }}";
-        localStorage.setItem("{{ username }}_cert", clientCert);
+        localStorage.setItem("{{ username }}_cert", "{{ client_cert }}");
     </script>
     {% endif %}
 

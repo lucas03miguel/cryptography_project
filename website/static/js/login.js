@@ -15,7 +15,5 @@ document.getElementById("loginForm").addEventListener("submit", function (event)
         input.value = clientCert;
         form.appendChild(input);
         form.submit();
-    } else {
-        alert("No certificate found for this username.");
     }
 });

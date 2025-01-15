@@ -1,8 +1,11 @@
-all: run then
+all: run
+
+down:
+	docker-compose down
+	$(MAKE) run
 
 run:
 	docker-compose build
-
-then:
 	docker-compose up
+
 
