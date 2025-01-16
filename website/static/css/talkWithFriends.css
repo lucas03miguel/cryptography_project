@@ -108,7 +108,11 @@ body {
 .chat-message {
     display: flex;
     margin-bottom: 10px;
+    width: calc(100% - 0px);
+    margin-left: 0px; 
+    
 }
+
 
 
 .chat-message.sent {
@@ -122,16 +126,22 @@ body {
 
 
 .chat-message p {
-    max-width: 70%;
-    padding: 10px;
+    max-width: 100%; /* Limite geral */
+    padding: 10px ;
     border-radius: 10px;
     margin: 0;
+    word-wrap: break-word; /* Quebra automaticamente palavras longas */
+    max-width: 50ch; /* Limita a largura a 50 caracteres aproximadamente */
+    direction: ltr; /* Direção da esquerda para a direita */
+    text-align: left; /* Alinha o texto à esquerda */
 }
+
+
 
 
 .chat-message.sent p {
     background-color: #dcf8c6;
-    text-align: right;
+    text-align: left;
 }
 
 
