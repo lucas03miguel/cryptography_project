@@ -316,14 +316,12 @@ def save_private_key(username, private_key, password):
 @app.route("/index", methods=['GET', 'POST'])
 def index():
     is_authenticated = 'user' in session
-    print("ei", session['route'])
 
     if not is_authenticated:
         return render_template("index.html", is_authenticated=False)
     
     session['route'] = '/index'
     username = session['user']
-    print(session['route'])
 
     return render_template("index.html", is_authenticated=True, username=username)
 
@@ -336,7 +334,6 @@ def index():
 @app.route("/add_friends", methods=['GET', 'POST'])
 def add_friends():
     is_authenticated = 'user' in session
-    print("ola")
 
     session['route'] = '/add_friends'
 
@@ -490,7 +487,6 @@ def manage_friend_request():
 @app.route("/talk_with_friends", methods=['GET'])
 def talk_with_friends():
     is_authenticated = 'user' in session
-    print("dsfdfs")
 
     session['route'] = '/talk_with_friends'
 
