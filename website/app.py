@@ -38,12 +38,12 @@ def restrict_methods():
 @app.route("/", methods=['GET', 'POST'])
 def home():
     session['valid_access'] = True
-    session['route'] = '/'
     
     is_authenticated = 'user' in session
     if is_authenticated:
-        return redirect("/index")
+        return redirect(session['route'])
     
+    session['route'] = '/'
     remembered_username = request.cookies.get('remembered_username')
     
     if remembered_username:
@@ -69,11 +69,11 @@ def login():
     if 'route' not in session:
         session['route'] = None
 
-    if not session.get('valid_access') and session['route'] != 'login':
-        session['route'] = 'login'
-        return redirect("/login")
+    if not session.get('valid_access') and session['route'] != '/login':
+        session['route'] = '/login'
+        return redirect(session['route'])
     
-    session['route'] = 'login'
+    session['route'] = '/login'
     
     if request.method == 'POST':
         try:
@@ -148,7 +148,7 @@ def login():
 ##########################################################
 @app.route("/registration", methods=['GET', 'POST'])
 def registration():
-    session['route'] = 'registration'
+    session['route'] = '/registration'
 
     if 'user' in session:
         return redirect("/index")
@@ -316,14 +316,16 @@ def save_private_key(username, private_key, password):
 @app.route("/index", methods=['GET', 'POST'])
 def index():
     is_authenticated = 'user' in session
-    session['route'] = 'index'
+    print("ei", session['route'])
 
     if not is_authenticated:
         return render_template("index.html", is_authenticated=False)
     
+    session['route'] = '/index'
     username = session['user']
+    print(session['route'])
 
-    return render_template("index.html", is_authenticated=True)
+    return render_template("index.html", is_authenticated=True, username=username)
 
 
 
@@ -334,8 +336,9 @@ def index():
 @app.route("/add_friends", methods=['GET', 'POST'])
 def add_friends():
     is_authenticated = 'user' in session
+    print("ola")
 
-    session['route'] = 'add_friends'
+    session['route'] = '/add_friends'
 
     if not is_authenticated:
         return render_template("addFriends.html", is_authenticated=False)
@@ -424,11 +427,11 @@ def manage_friend_request():
     if 'route' not in session:
         session['route'] = None
 
-    if not session.get('valid_access') and session['route'] not in ['add_Friends', 'manage_friend_request']:
+    if not session.get('valid_access') and session['route'] not in ['/add_Friends', '/manage_friend_request']:
         return redirect("/add_Friends")
     
-    session['route'] = 'manage_friend_request'
-
+    session['route'] = '/manage_friend_request'
+    
     username = session['user']
     sender = escape(request.form['sender'])
     action = request.form['action']
@@ -487,8 +490,9 @@ def manage_friend_request():
 @app.route("/talk_with_friends", methods=['GET'])
 def talk_with_friends():
     is_authenticated = 'user' in session
+    print("dsfdfs")
 
-    session['route'] = 'talk_with_friends'
+    session['route'] = '/talk_with_friends'
 
     if not is_authenticated:
         return render_template("talkWithFriends.html", is_authenticated=False)
@@ -517,6 +521,7 @@ def talk_with_specific_friend(friend):
     if not is_authenticated:
         return render_template("talkWithFriends.html", is_authenticated=False)
 
+    session['route'] = '/talk_with_friends/' + friend
     username = session['user']
 
     conn = get_db()
@@ -626,7 +631,7 @@ def send_message():
 
     if request.method == 'GET':
         return redirect("/talk_with_friends")
-    
+        
     username = session['user']
     friend = request.form.get('friend')
     message = request.form.get('message')
@@ -731,18 +736,15 @@ def get_sender_public_key(sender):
 ##########################################################
 @app.route('/logout', methods=['GET' ,'POST'])
 def logout():
-
-    if not session.get('valid_access') or session['route'] not in ['index']:
+    if not session.get('valid_access') or session['route'] != '/index':
         return redirect("/index")
 
-    session['route'] = 'logout'
     session.clear()
-    
     resp = redirect('/')
-    
+
     if request.cookies.get('remembered_username'):  
         resp.delete_cookie('remembered_username')
-    
+
     return resp
 
 
