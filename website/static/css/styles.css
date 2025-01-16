@@ -69,3 +69,27 @@ button:hover {
     font-weight: bold;
     line-height: 1.5;
 }
+
+
+#message-td {
+    height: 3rem;
+}
+
+
+.message {
+    display: block;
+    padding-left: 0.6250rem;
+    font-size: 14px; 
+    color: white;
+    border-radius: 0.3125rem;
+}
+
+
+.message.error {
+    color: red;
+}
+
+
+.message.success {
+    color: green;
+}

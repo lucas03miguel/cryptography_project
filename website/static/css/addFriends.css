@@ -9,10 +9,12 @@ table {
     text-align: center;
 }
 
+
 td {
     padding: 0.625rem;
     text-align: center;
 }
+
 
 input.username-input {
     width: 90%; 
@@ -22,10 +24,12 @@ input.username-input {
     font-size: 1rem;
 }
 
+
 button.add-friend-button {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     color: #fff;
     background-color: rgb(76, 76, 76);
     border: none;
@@ -33,6 +37,7 @@ button.add-friend-button {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+
 
 .message {
     display: block;
@@ -45,21 +50,23 @@ button.add-friend-button {
     visibility: hidden;
 }
 
+
 .message.success {
     visibility: visible;
     color: rgb(76, 175, 80);
 }
+
 
 .message.error {
     visibility: visible;
     color: rgb(244, 67, 54);
 }
 
+
 .message.neutral {
     visibility: visible;
     color: black;
 }
-
 
 
 .friend-requests-container {
@@ -71,6 +78,7 @@ button.add-friend-button {
     justify-content: center;
 }
 
+
 .table-wrapper {
     max-height: 200px;
     overflow-y: auto; 
@@ -81,12 +89,14 @@ button.add-friend-button {
     width: 80%;
 }
 
+
 .friend-requests-table {
     width: 100%;
     border-collapse: collapse;
     margin: 0 auto;
     border: none;
 }
+
 
 .friend-requests-table th,
 .friend-requests-table td {
@@ -95,18 +105,22 @@ button.add-friend-button {
     text-align: center;
 }
 
+
 .friend-requests-table th {
     background-color: #f4f4f4;
     font-weight: bold;
 }
 
+
 .friend-requests-table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
+
 .friend-requests-table tr:hover {
     background-color: #f1f1f1;
 }
+
 
 .accept-button {
     background-color: #4caf50;
@@ -117,6 +131,7 @@ button.add-friend-button {
     cursor: pointer;
 }
 
+
 .reject-button {
     background-color: #f44336;
     color: white;
@@ -126,9 +141,11 @@ button.add-friend-button {
     cursor: pointer;
 }
 
+
 .accept-button:hover {
     background-color: #45a049;
 }
+
 
 .reject-button:hover {
     background-color: #d32f2f;

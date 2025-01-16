@@ -9,6 +9,7 @@ table {
     text-align: center;
 }
 
+
 .form-container {
     display: flex;
     justify-content: center;
@@ -17,15 +18,18 @@ table {
     gap: 5rem;
 }
 
+
 .form-block {
     position: relative;
 }
+
 
 th {
     padding: 0.625rem;
     font-size: 1.125rem;
     width: 100%;
 }
+
 
 td {
     padding: 0.625rem;
@@ -56,28 +60,4 @@ input.checkbox {
     border-radius: 0.3125rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
-
-
-#message-td {
-    height: 3rem;
-}
-
-
-.message {
-    display: block;
-    padding-left: 0.6250rem;
-    font-size: 14px; 
-    color: white;
-    border-radius: 0.3125rem;
-}
-
-
-.message.error {
-    color: red;
-}
-
-
-.message.success {
-    color: green;
 }

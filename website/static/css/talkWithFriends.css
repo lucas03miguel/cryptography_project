@@ -126,17 +126,15 @@ body {
 
 
 .chat-message p {
-    max-width: 100%; /* Limite geral */
+    max-width: 100%;
     padding: 10px ;
     border-radius: 10px;
     margin: 0;
-    word-wrap: break-word; /* Quebra automaticamente palavras longas */
-    max-width: 50ch; /* Limita a largura a 50 caracteres aproximadamente */
-    direction: ltr; /* Direção da esquerda para a direita */
-    text-align: left; /* Alinha o texto à esquerda */
+    word-wrap: break-word;
+    max-width: 50ch; 
+    direction: ltr; 
+    text-align: left;
 }
-
-
 
 
 .chat-message.sent p {
