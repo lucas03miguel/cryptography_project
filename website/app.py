@@ -10,7 +10,6 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 from cryptography.exceptions import InvalidSignature
 
 from datetime import datetime, timedelta, timezone
@@ -217,11 +216,6 @@ def registration():
 
 
 
-
-##########################################################
-## Geração de certificados e chaves para cada utilizador posteriormente usados nos chats
-##########################################################
-
 def generate_certificate(username, usage):
     """
     Gera chaves RSA e um certificado assinado pela CA.
@@ -282,6 +276,7 @@ def generate_certificate(username, usage):
 
 
     return private_key, cert, public_key_pem
+
 
 
 def save_private_key(username, private_key, password):
@@ -480,7 +475,6 @@ def manage_friend_request():
 
 
 
-
 ##########################################################
 ## Talk with friends
 ##########################################################
@@ -508,6 +502,7 @@ def talk_with_friends():
     friends_list = [friend[0] for friend in friends]
 
     return render_template("talkWithFriends.html", is_authenticated=True, friends=friends_list)
+
 
 
 @app.route("/talk_with_friends/<friend>", methods=['GET'])
@@ -724,6 +719,7 @@ def get_sender_public_key(sender):
     except Exception as e:
         logger.error(f"Failed to load public key for {sender}: {e}")
         raise
+
 
 
 
