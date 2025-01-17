@@ -12,6 +12,10 @@ Este projeto demonstra a implementação de um website seguro com HTTPS utilizan
 3. Abre o browser e navega para:
    - [https://localhost](https://localhost)
 
+Inicialmente irá aparecer este aviso, visto que o certificado usado para a ligação HTTPS não é considerado fidedigno.
+Basta clicar em  Avançadas -> Continuar para localhost
+![alt text](website/static/img/image.png)
+
 ## Estrutura do Projeto
 
 - **certificates/**: Contém os certificados e chaves para a PKI.
